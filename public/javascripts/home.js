@@ -1,22 +1,15 @@
 //init
 var chart ;
-var dataUrl = "http://localhost:8888/StockData";
+
 $("#searcher_date").val(new Date().toISOString().split("T")[0]);
 //----------------------------------------------------------------------
 // data generation
-var data1 = generateChartData(new Date(),400, 5);
-var data2 = generateChartData(new Date(),400, 5);
-var datasets = {
-	3301: data1,
-	大立光: data1,
-	3302: data2,
-	小立光: data2
-};
+var dataToDisplay = generateChartData(new Date(),400, 5);
 
-
+// random gen
 function generateChartData(date,minuteNum, interval) {
     // current date
-    var firstDate = new Date('2016-11-02 9:00:00');
+    var firstDate = date;
     var chartData = [{date:firstDate, price:"100"}];
 
 
@@ -52,44 +45,13 @@ function genDatum(chartData, date){
 }
 
 
-(function(){
-	// $.ajax({
-	// 	url: dataUrl,
-	// 	data: {
-	// 		date: $('#searcher_date').val(),
-	// 		symbol: 2454
-	// 	},
-	// 	type: "GET",
-	// 	dataType: "json",
-	// 	success: function(data){
-	// 		console.log(data);
- //   		},
- //   		error:function (err){
- //   			console.log(err);
- //   		}
-
-	// })
-	// console.log("HIHI");
-	$.get(
-		dataUrl,
-		{
-			date: $('#searcher_date').val(),
-			symbol: 2443
-		},
-		function(data){
-			console.log("success!");
-			console.log(data);
-		});
-})();
-
 //----------------------------------------------------------------------
 // chart init
 d3.json("config/generalChart.json", (style) => {
-	style.dataProvider = data1;
 	chart = AmCharts.makeChart("chartdiv", style);
 	chart.addListener('dataUpdated', zoomChart);
-	zoomChart();
-
+	chart.dataProvider = dataToDisplay;
+	chart.validateData();
 });
 
 
@@ -101,77 +63,130 @@ d3.json("config/generalChart.json", (style) => {
 // zoom
 var oldStartDate, oldEndDate;
 function zoomChart(){
-	if(document.getElementById('tracker').checked){
+	if(document.getElementById('tracker').checked || !oldStartDate || !oldEndDate){
 		var interval = document.getElementById('trackerInterval').value;
 		var lastDate = new Date(chart.dataProvider[chart.dataProvider.length-1].date);
 		var startDate = new Date(lastDate)
 		startDate.setMinutes(startDate.getMinutes() - interval - 5);
 		lastDate.setMinutes(lastDate.getMinutes() + 5);
 		chart.zoomToDates(startDate,lastDate);
+		recordDate();
 	}
 	else{
     	chart.zoomToDates(oldStartDate, oldEndDate);
 	}
 }
+// record last value
+function recordDate(){
+    oldStartDate = new Date(chart.startDate);
+    oldEndDate = new Date(chart.endDate);
+}
+
 
 //----------------------------------------------------------------------
 $("#trackerInterval").on("change",()=>{
 	zoomChart();
 })
+
 //----------------------------------------------------------------------
-// for 3s a time loop
-var refreshId = setInterval(()=>{
-	var chartData = chart.dataProvider;
-    var ref = parseFloat(chartData[chartData.length-2].price);
-	var rand = Math.random() * 10 - 5;
-    var price = (ref+rand).toFixed(2);
-    chart.dataProvider[chartData.length-1].price = price;
-
-	// update
-    var newDate = new Date(chart.dataProvider[chart.dataProvider.length-1].date);
-    newDate.setMinutes(newDate.getMinutes() + 5);
-    // add data item to the array
-
-    chart.dataProvider.push({
-    	date: newDate,
-    	predict: (ref+rand + Math.random() * 4 - 2).toFixed(2)
-    });
-	//
-
-    oldStartDate = new Date(chart.startDate.getTime());
-    oldStartDate.setDate(oldStartDate.getDate());
-    oldEndDate = new Date(chart.endDate.getTime());
-    oldEndDate.setDate(oldEndDate.getDate());
-	chart.validateData();
-
-	if(newDate.getHours() >= 17){
-		clearInterval(refreshId);
-	}
-
-},3000);
-//----------------------------------------------------------------------
-
-$("#searcher").on("keydown",(event)=>{
+// #searcher event
+$("#searcher").on("keydown", function (event){
 	if(event.keyCode == 13){
-		var searcher = document.getElementById("searcher");
-		if(datasets[searcher.value]){
-			chart.dataProvider = datasets[searcher.value];
-			chart.validateData();
-			document.getElementById("searchermsg").innerHTML = "";
+		var stock = this.value;
+		var date = $("#searcher_date").val().split('-').join('');
+		searchHandler(stock, date);
+	}
+})
+$("#searcher").on("focusout",function(){
+	var stock = this.value;
+	var date = $("#searcher_date").val().split('-').join('');
+	searchHandler(stock, date);
+})
+
+//----------------------------------------------------------------------
+// #searcher_date event
+$("#searcher_date").on("focusout", function (){
+	var stock = $("#searcher").val();
+	var date = this.value.split('-').join('');
+	// find the data
+	searchHandler(stock,date);
+})
+//----------------------------------------------------------------------
+function searchHandler(stock_num, date){
+	console.log();
+	d3.csv(date+'_'+stock_num+'.csv', (priceData)=>{
+		if(!priceData){
+			console.log('file not found!');
+			$("#searchermsg").css('color','red');
+			$("#searchermsg").html("沒有找到此股票！");
 		}
 		else{
-			document.getElementById("searchermsg").style.color = "red";
-			document.getElementById("searchermsg").innerHTML = "沒有找到此股票！";
+			// clear dataToDisplay
+			dataToDisplay = [];
+			// push data
+			priceData.forEach((element)=>{
+				dataToDisplay.push({
+					date: element.date,
+					price: element.price
+				});
+			});
+
+			d3.csv(date+'_'+stock_num+'.forecast.csv', (forecastData)=>{
+				if(!forecastData){
+					$("#searchermsg").css('color','red');
+					$("#searchermsg").html("此股票沒有預測之資料！");
+				}
+				else{
+					forecastData.forEach((element)=>{
+						var exists = dataToDisplay.findIndex((elementPrice)=>{
+							return elementPrice.date == element.price;
+						});
+						if(exists != -1){
+							dataToDisplay[indexInData].predict = element.price;
+						}
+						else{
+							dataToDisplay.push({
+								date: element.date,
+								predict: element.price
+							})
+						}
+					});
+				}
+				chart.dataProvider = dataToDisplay;
+				chart.validateData();
+			})
 		}
-	}
-})
+	});
+}
 
 //----------------------------------------------------------------------
-$("#searcher_date").on("change", function (){
-	console.log(this.value);
-})
+// for 3s a time loop
+// var refreshId = setInterval(()=>{
+// 	var chartData = chart.dataProvider;
+//     var ref = parseFloat(chartData[chartData.length-2].price);
+// 	var rand = Math.random() * 10 - 5;
+//     var price = (ref+rand).toFixed(2);
+//     chart.dataProvider[chartData.length-1].price = price;
 
+// 	// update
+//     var newDate = new Date(chart.dataProvider[chart.dataProvider.length-1].date);
+//     newDate.setMinutes(newDate.getMinutes() + 5);
+//     // add data item to the array
 
+//     chart.dataProvider.push({
+//     	date: newDate,
+//     	predict: (ref+rand + Math.random() * 4 - 2).toFixed(2)
+//     });
+// 	//
 
+//     oldStartDate = new Date(chart.startDate.getTime());
+//     oldStartDate.setDate(oldStartDate.getDate());
+//     oldEndDate = new Date(chart.endDate.getTime());
+//     oldEndDate.setDate(oldEndDate.getDate());
+// 	chart.validateData();
 
+// 	if(newDate.getHours() >= 17){
+// 		clearInterval(refreshId);
+// 	}
 
+// },3000);

@@ -3,6 +3,8 @@
 
 <head>
     <title>Stocku</title>
+    <meta name="robots" content="noindex" />
+
     <!-- Styles -->
     <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
@@ -26,12 +28,12 @@
     <nav class="navbar" role="navigation">
         <div class="container">
             <div class="navbar-header">
-                <a class="navbar-brand" href="index.html"></a>
+                <a class="navbar-brand" href="Home"></a>
             </div>
             <div class="collapse navbar-collapse" id="top-navbar-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="active">
-                        <a href="index.html"><span aria-hidden="true" class="icon_house"></span><br>Home</a>
+                        <a href="Home"><span aria-hidden="true" class="icon_house"></span><br>Home</a>
                     </li>
                     <li>
                         <a href="#search_stock"><span aria-hidden="true" class="icon_search"></span><br>股票查詢</a>
@@ -61,7 +63,7 @@
                         查詢日期：
                         <input id="searcher_date" type="date">
                         <input id="tracker" type="checkbox" checked="true">追蹤最近
-                        <input id="trackerInterval" type="number" placeholder="interval" value="60">min.
+                        <input id="trackerInterval" type="number" placeholder="interval" value="20">min.
                         <br>圖例：
                         <div id="legenddiv"></div>
                     </div>

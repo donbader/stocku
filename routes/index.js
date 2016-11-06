@@ -8,4 +8,14 @@ router.get('/', function(req, res, next){
 });
 
 
+router.get('/Home', function(req, res, next){
+	res.sendFile(path.join(__dirname, '../', 'index.html'));
+});
+
+router.get('/index.html', function(req, res, next){
+	res.sendFile(path.join(__dirname, '../', 'index.html'));
+});
+
+
+
 module.exports = router;
