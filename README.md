@@ -1,0 +1,2 @@
+# stocku
+stock predicting website
