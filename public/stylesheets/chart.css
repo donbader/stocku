@@ -1,0 +1,36 @@
+#chartdiv{
+    width       : 100%;
+    height      : 400px;
+    font-size   : 11px;
+}
+#legenddiv{
+    height: 100px !important; /* force that height */
+    overflow: auto;
+    position: relative;
+    margin: 5px 0 20px 0;
+}
+
+#trackerInterval{
+    width       :40px;
+}
+
+#searcher{
+    background-image: url('../images/search.png');
+}
+input[type=search],input[type=date]{
+    width: 100%;
+    height: 25px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    background-position: 2px 2px;
+    background-repeat: no-repeat;
+    padding: 2px 3px 2px 25px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out;
+
+}
+
+
