@@ -38,7 +38,7 @@
 
     },
     {
-      "id": "predictGraph",
+      "id": "forecastGraph",
       "type": "smoothedLine",
       "lineThickness": 2,
       "fillAlphas": 0,
@@ -52,7 +52,7 @@
       },
       "title": "預測線",
       "titleField": "date",
-      "valueField": "predict"
+      "valueField": "forecast"
     }
   ],
   "chartScrollbar": {

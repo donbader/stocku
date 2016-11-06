@@ -33,11 +33,11 @@ function genDatum(chartData, date){
     var ref = parseFloat(chartData[chartData.length-1].price);
 	var rand = Math.random() * 10 - 5;
     var price = (ref+rand).toFixed(2);
-    var predict = (ref+rand + Math.random() * 4 - 2).toFixed(2);
+    var forecast = (ref+rand + Math.random() * 4 - 2).toFixed(2);
 	return {
         date: date,
         price: price,
-        predict: predict
+        forecast: forecast
 	};
 }
 
@@ -50,11 +50,11 @@ dataToDisplay = generateChartData(new Date(),400, 5);
 d3.json("config/generalChart.json", (style) => {
 	chart = AmCharts.makeChart("chartdiv", style);
 	chart.addListener('dataUpdated', zoomChart);
-	chart.dataProvider = dataToDisplay;
-	chart.validateData();
+	// chart.dataProvider = dataToDisplay;
+	// chart.validateData();
 
 	// init as #searcher value
-	// $("#searcher").focus().focusout();
+	$("#searcher").focus().focusout();
 });
 
 
@@ -66,7 +66,7 @@ d3.json("config/generalChart.json", (style) => {
 // zoom
 var oldStartDate, oldEndDate;
 function zoomChart(){
-	if(document.getElementById('tracker').checked || !oldStartDate || !oldEndDate){
+	if(document.getElementById('tracker').checked){
 		var interval = document.getElementById('trackerInterval').value;
 		var lastDate = new Date(chart.dataProvider[chart.dataProvider.length-1].date);
 		var startDate = new Date(lastDate)
@@ -116,18 +116,17 @@ $("#searcher_date").on("focusout", function (){
 })
 //----------------------------------------------------------------------
 function searchHandler(stock_num, date){
-	console.log();
 	d3.csv(date+'_'+stock_num+'.csv', (priceData)=>{
 		if(!priceData){
-			console.log('file not found!');
-			$("#searchermsg").css('color','red');
-			$("#searchermsg").html("沒有找到此股票！");
+			$("#searchermsg").trigger("DataNotFound", "沒有找到此股票("+stock_num+")！");
 		}
 		else{
+			$("#searchermsg").trigger("DataFound", "");
 			// clear dataToDisplay
 			dataToDisplay = [];
 			// push data
 			priceData.forEach((element)=>{
+				if(!element.date)return;
 				dataToDisplay.push({
 					date: element.date,
 					price: element.price
@@ -136,21 +135,22 @@ function searchHandler(stock_num, date){
 
 			d3.csv(date+'_'+stock_num+'.forecast.csv', (forecastData)=>{
 				if(!forecastData){
-					$("#searchermsg").css('color','red');
-					$("#searchermsg").html("此股票沒有預測之資料！");
+					$("#searchermsg").trigger("DataNotFound", "此股票("+stock_num+")沒有預測之資料！");
 				}
 				else{
+					$("#searchermsg").trigger("DataFound", "");
 					forecastData.forEach((element)=>{
+						if(!element.date)return;
 						var exists = dataToDisplay.findIndex((elementPrice)=>{
 							return elementPrice.date == element.price;
 						});
 						if(exists != -1){
-							dataToDisplay[indexInData].predict = element.price;
+							dataToDisplay[indexInData].forecast = element.price;
 						}
 						else{
 							dataToDisplay.push({
 								date: element.date,
-								predict: element.price
+								forecast: element.price
 							})
 						}
 					});
@@ -161,35 +161,26 @@ function searchHandler(stock_num, date){
 		}
 	});
 }
-
+//----------------------------------------------------------------------
+// data not found event
+$("#searchermsg").on('DataNotFound', (event, msg)=>{
+	console.log('Data not found!');
+	$("#searchermsg").css('color','red');
+	$("#searchermsg").html(msg);
+})
+// data found event
+$("#searchermsg").on('DataFound', (event, msg)=>{
+	$("#searchermsg").css('color','green');
+	$("#searchermsg").html(msg);
+});
 //----------------------------------------------------------------------
 // for 3s a time loop
 // var refreshId = setInterval(()=>{
-// 	var chartData = chart.dataProvider;
-//     var ref = parseFloat(chartData[chartData.length-2].price);
-// 	var rand = Math.random() * 10 - 5;
-//     var price = (ref+rand).toFixed(2);
-//     chart.dataProvider[chartData.length-1].price = price;
-
-// 	// update
-//     var newDate = new Date(chart.dataProvider[chart.dataProvider.length-1].date);
-//     newDate.setMinutes(newDate.getMinutes() + 5);
-//     // add data item to the array
-
-//     chart.dataProvider.push({
-//     	date: newDate,
-//     	predict: (ref+rand + Math.random() * 4 - 2).toFixed(2)
-//     });
-// 	//
-
-//     oldStartDate = new Date(chart.startDate.getTime());
-//     oldStartDate.setDate(oldStartDate.getDate());
-//     oldEndDate = new Date(chart.endDate.getTime());
-//     oldEndDate.setDate(oldEndDate.getDate());
-// 	chart.validateData();
-
-// 	if(newDate.getHours() >= 17){
-// 		clearInterval(refreshId);
-// 	}
-
+// 	var stock = $("#searcher").val();
+// 	var date = $("#searcher_date").val().split('-').join('');
+// 	// for zooming
+// 	recordDate();
+// 	searchHandler(stock, date);
 // },3000);
+
+
