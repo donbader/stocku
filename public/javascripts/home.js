@@ -1,12 +1,9 @@
 //init
 var chart ;
-
+var dataToDisplay;
 $("#searcher_date").val(new Date().toISOString().split("T")[0]);
 //----------------------------------------------------------------------
-// data generation
-var dataToDisplay = generateChartData(new Date(),400, 5);
-
-// random gen
+// random gen function
 function generateChartData(date,minuteNum, interval) {
     // current date
     var firstDate = date;
@@ -46,12 +43,18 @@ function genDatum(chartData, date){
 
 
 //----------------------------------------------------------------------
+// can be modified to Recommend
+dataToDisplay = generateChartData(new Date(),400, 5);
+
 // chart init
 d3.json("config/generalChart.json", (style) => {
 	chart = AmCharts.makeChart("chartdiv", style);
 	chart.addListener('dataUpdated', zoomChart);
 	chart.dataProvider = dataToDisplay;
 	chart.validateData();
+
+	// init as #searcher value
+	// $("#searcher").focus().focusout();
 });
 
 
