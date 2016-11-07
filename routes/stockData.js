@@ -3,30 +3,69 @@ var path = require('path');
 var fs = require('fs');
 var router = express.Router();
 
+var updateTime = new Date();
+updateTime.setSeconds(updateTime.getSeconds() + 20);
+
 
 /* GET stock data page. */
 router.get('/StockData/price', function(req, res) {
 	console.log("[GET] 'StockData/price'");
+	console.log(req.query);
 	var date = req.query.date.split('-').join('');
 	var stock = req.query.stock;
+	var lastTimeUpdate = req.query.lastTimeUpdate;
 	var file_path = 'database/' + date + '_' + stock + '.csv';
 	try{
 		var data = fs.readFileSync(file_path, 'utf-8');
-		res.send(parseCSV(data));
+		if(!lastTimeUpdate
+			|| (Number(lastTimeUpdate) < updateTime.getTime()
+			&& (new Date()).getTime() > updateTime.getTime())){
+			console.log('\tSend DataFound');
+			res.send({
+				msg: 'DataFound',
+				content: parseCSV(data)
+			});
+		}
+		else {
+			console.log('\tSend AlreadyUpdate');
+			res.send({
+				msg: 'AlreadyUpdate'
+			});
+		}
 	}catch(err){
-		res.send([]);
+		res.send({
+			msg: 'DataNotFound'
+		});
 	}
 });
 router.get('/StockData/forecast', function(req, res) {
 	console.log("[GET] 'StockData/forecast'");
+	console.log(req.query);
 	var date = req.query.date.split('-').join('');
 	var stock = req.query.stock;
+	var lastTimeUpdate = req.query.lastTimeUpdate;
 	var file_path = 'database/' + date + '_' + stock + '.forecast.csv';
 	try{
 		var data = fs.readFileSync(file_path, 'utf-8');
-		res.send(parseCSV(data));
+		if(!lastTimeUpdate
+			|| (Number(lastTimeUpdate) < updateTime.getTime()
+			&& (new Date()).getTime() > updateTime.getTime())){
+			console.log('\tSend DataFound');
+			res.send({
+				msg: 'DataFound',
+				content: parseCSV(data)
+			});
+		}
+		else {
+			console.log('\tSend AlreadyUpdate');
+			res.send({
+				msg: 'AlreadyUpdate'
+			});
+		}
 	}catch(err){
-		res.send([]);
+		res.send({
+			msg: 'DataNotFound'
+		});
 	}
 });
 
