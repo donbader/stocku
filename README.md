@@ -31,3 +31,10 @@ $ node bin/www
 ```
 $ PORT=???? npm start
 ```
+
+
+## 結構:
+`/database`： 存放股票資料  
+`/public`：放前端的js、css、3rdparty  
+`app.js`：server主程式，由`/bin/www`呼叫  
+`package.json`：npm的config  
