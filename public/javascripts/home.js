@@ -1,5 +1,6 @@
 //init
-var chart ;
+var port = 3000;
+var chart;
 var dataToDisplay;
 $("#searcher_date").val(new Date().toISOString().split("T")[0]);
 //----------------------------------------------------------------------
@@ -116,63 +117,87 @@ $("#searcher_date").on("focusout", function (){
 })
 //----------------------------------------------------------------------
 function searchHandler(stock_num, date){
-	d3.csv(date+'_'+stock_num+'.csv', (priceData)=>{
-		if(!priceData){
-			$("#searchermsg").trigger("DataNotFound", "沒有找到此股票("+stock_num+")！");
+	dataToDisplay = [];
+	$.get("/StockData/price",{stock: stock_num, date: date},
+		(data)=>{
+			if(data.length){
+				$("#priceDatamsg").trigger("DataFound", ["", data]);
+			}
+			else{
+				$("#priceDatamsg").trigger("DataNotFound", "沒有找到此股票("+stock_num+")！");
+			}
 		}
-		else{
-			$("#searchermsg").trigger("DataFound", "");
-			// clear dataToDisplay
-			dataToDisplay = [];
-			// push data
-			priceData.forEach((element)=>{
-				if(!element.date)return;
-				dataToDisplay.push({
-					date: element.date,
-					price: element.price
-				});
-			});
+	);
 
-			d3.csv(date+'_'+stock_num+'.forecast.csv', (forecastData)=>{
-				if(!forecastData){
-					$("#searchermsg").trigger("DataNotFound", "此股票("+stock_num+")沒有預測之資料！");
-				}
-				else{
-					$("#searchermsg").trigger("DataFound", "");
-					forecastData.forEach((element)=>{
-						if(!element.date)return;
-						var exists = dataToDisplay.findIndex((elementPrice)=>{
-							return elementPrice.date == element.price;
-						});
-						if(exists != -1){
-							dataToDisplay[indexInData].forecast = element.price;
-						}
-						else{
-							dataToDisplay.push({
-								date: element.date,
-								forecast: element.price
-							})
-						}
-					});
-				}
-				chart.dataProvider = dataToDisplay;
-				chart.validateData();
-			})
+	$.get("/StockData/forecast",{stock: stock_num, date: date},
+		(data)=>{
+			if(data.length){
+				$("#forecastDatamsg").trigger("DataFound", ["", data]);
+			}
+			else{
+				$("#forecastDatamsg").trigger("DataNotFound", "沒有找到此股票之預測資料("+stock_num+")！");
+			}
 		}
-	});
+	);
 }
 //----------------------------------------------------------------------
 // data not found event
-$("#searchermsg").on('DataNotFound', (event, msg)=>{
-	console.log('Data not found!');
-	$("#searchermsg").css('color','red');
-	$("#searchermsg").html(msg);
+$("#priceDatamsg").on('DataNotFound', (event, msg)=>{
+	$("#priceDatamsg").css('color','red');
+	$("#priceDatamsg").html(msg);
 })
 // data found event
-$("#searchermsg").on('DataFound', (event, msg)=>{
-	$("#searchermsg").css('color','green');
-	$("#searchermsg").html(msg);
+$("#priceDatamsg").on('DataFound', (event, msg, data)=>{
+	$("#priceDatamsg").css('color','green');
+	$("#priceDatamsg").html(msg);
+	// render
+	dataToDisplay = dataToDisplay.concat(data);
+	dataToDisplay = mergeStockData(dataToDisplay);
+	chart.dataProvider = dataToDisplay;
+	chart.validateData();
+
 });
+// data not found event
+$("#forecastDatamsg").on('DataNotFound', (event, msg)=>{
+	$("#forecastDatamsg").css('color','red');
+	$("#forecastDatamsg").html(msg);
+})
+// data found event
+$("#forecastDatamsg").on('DataFound', (event, msg, data)=>{
+	$("#forecastDatamsg").css('color','green');
+	$("#forecastDatamsg").html(msg);
+	// render
+	dataToDisplay = dataToDisplay.concat(data);
+	dataToDisplay = mergeStockData(dataToDisplay);
+	chart.dataProvider = dataToDisplay;
+	chart.validateData();
+});
+//----------------------------------------------------------------------
+// merge data
+function mergeStockData(data){
+	var merged = {};
+	var merged_arr = [];
+	data.forEach(function(item, pos){
+		if(!merged[item.date])
+			merged[item.date] = {};
+
+		for(var attrName in item){
+			if(attrName == 'stock')continue;
+			merged[item.date][attrName] = item[attrName];
+		}
+	});
+
+	for(var date in merged){
+		var obj;
+		merged_arr.push({
+			date: date,
+			price: merged[date].price,
+			forecast: merged[date].forecast
+		});
+	}
+	return merged_arr;
+}
+
 //----------------------------------------------------------------------
 // for 3s a time loop
 // var refreshId = setInterval(()=>{

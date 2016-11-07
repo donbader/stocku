@@ -5,6 +5,7 @@ var favicon = require('serve-favicon');
 
 // Routes
 var index = require('./routes/index');
+var stockData = require('./routes/stockData');
 
 
 // App
@@ -15,10 +16,11 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 // Add path
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, '../database')));
 
-// for render '/'
+
+// Route Service
 app.use('/', index);
+app.use('/', stockData);
 
 
 
