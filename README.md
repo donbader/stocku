@@ -2,8 +2,9 @@
 
 ## Dependencies
 1. 安裝nodemon （讓server 可以在檔案變更之後自動重啟）
+（-g 等於 安裝在global）
 ```
-$ npm install nodemon -g
+$ npm install -g nodemon
 ```
 
 ## 安裝:
