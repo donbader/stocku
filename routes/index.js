@@ -12,5 +12,9 @@ router.get('/Home', function(req, res, next){
 	res.sendFile(path.join(__dirname, '../', 'index.html'));
 });
 
+router.get('/history', function(req, res, next){
+	res.sendFile(path.join(__dirname, '../', 'history.html'));
+});
+
 
 module.exports = router;
