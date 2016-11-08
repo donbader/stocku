@@ -2,17 +2,21 @@
  *              FIRST INITIALZATION               *
  **************************************************/
 var chart;
-//fill default date
-$("#stock_date").val(new Date().toISOString().split("T")[0]);
-//fill default stock id
-$("#stock_id").val(2498);
-//config chart style and init
-d3.json("config/generalChart_no_legend.json", (style) => {
-    chart = AmCharts.makeChart("chartdiv", style);
-    chart.addListener('dataUpdated', zoomChart);
-    /* init as server's data */
-    $("#stock_id").focus().focusout();
+$(document).ready(function(){
+    //fill default date
+    $("#stock_date").val(new Date().toISOString().split("T")[0]);
+    //fill default stock id
+    $("#stock_id").val(2498);
+    //config chart style and init
+    d3.json("config/generalChart_no_legend.json", (style) => {
+        chart = AmCharts.makeChart("chartdiv", style);
+        chart.addListener('dataUpdated', zoomChart);
+        /* init as server's data */
+        $("#stock_id").focus().focusout();
+    });
+    search();
 });
+
 
 /**************************************************
  *              GLOBAL FUNCTION                   *
@@ -49,25 +53,70 @@ function search_and_response(stock_id,date){
             log(response.msg,false);
             log(response.content,false);
             if(response.msg == 'DataFound'){
-                $("#stock_id").trigger("DataFound", ["YOU GOT IT!", response.content]);
+                $("#stock_id").trigger("DataFound", ["找到資料", response.content]);
                 lastTimeUpdate = (new Date()).getTime();
             }
             else if(response.msg == 'AlreadyUpdate'){
-               
+
             }
             else{//response.msg == 'DataNotFound'
-                 $("#stock_id").trigger("DataNotFound", ["FAIL!", ]);
+                 $("#stock_id").trigger("DataNotFound", ["找到不資料", ]);
                 lastTimeUpdate = (new Date()).getTime();
             }
         }
     );
 }
 //--------------------------------------------------
+function formalize(data){
+    local_array = [];
+    for(i = 0; i < data.length; i++){
+        local_array.push([data[i].date.split(' ')[1],data[i].price]);
+    }
+    return local_array;
+}
+//--------------------------------------------------
+function genTable(){
+    $('#example').dataTable().fnDestroy();
+    $('#example').DataTable( {
+        "ajax":             "tables/data.txt",
+        'aoColumns': [
+            { sWidth: "50%", bSearchable: false, bSortable: true },
+            { sWidth: "50%", bSearchable: false, bSortable: true }
+        ],
+        "bSort":            false,
+        "scrollY":          "200px",
+        "scrollCollapse":   false,
+        "info":             false,
+        "ordering":         true,
+        "paging":           false,
+        "searching":        false
+    } );
+}
+//--------------------------------------------------
+function genTable(data){
+    var dataSet = formalize(data);
+    $('#example').dataTable().fnDestroy();
+    $('#example').DataTable( {
+        'data':             dataSet,
+        'aoColumns': [
+            { sWidth: "50%", bSearchable: false, bSortable: true },
+            { sWidth: "50%", bSearchable: false, bSortable: true }
+        ],
+        "bSort":            false,
+        "scrollY":          "200px",
+        "scrollCollapse":   false,
+        "info":             false,
+        "ordering":         true,
+        "paging":           false,
+        "searching":        false
+    } );
+}
+//--------------------------------------------------
 
 /**************************************************
  *              DEBUG FUNCTION                    *
  **************************************************/
-//If you wanna disable debugging, make var enable_debug 
+//If you wanna disable debugging, make var enable_debug
 //false !!
 var enable_debug = true;
 //--------------------------------------------------
@@ -83,8 +132,7 @@ $("#stock_id").keyup(search);
 $("#stock_id").on('DataFound', (event, msg, data) => {
     $("#logmsg").css('color', 'green');
     $("#logmsg").html(msg);
-    log("test : " + data.length);
-    log(data);
+    genTable(data);
     chart.dataProvider = data;
     chart.validateData();
 });
@@ -97,19 +145,3 @@ $("#stock_id").on('DataNotFound', (event, msg, data) => {
 $("#stock_date").change(search);
 //--------------------------------------------------
 
-$(document).ready(function() {
-    $('#example').DataTable( {
-        "ajax":             "tables/data.txt",
-        'aoColumns': [ 
-            { sWidth: "50%", bSearchable: false, bSortable: true }, 
-            { sWidth: "50%", bSearchable: false, bSortable: true }
-        ],
-        "bSort":            false,
-        "scrollY":          "200px",
-        "scrollCollapse":   false,
-        "info":             false,
-        "ordering":         true,
-        "paging":           false,
-        "searching":        false
-    } );
-} );
