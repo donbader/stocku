@@ -8,7 +8,7 @@ updateTime.setSeconds(updateTime.getSeconds() + 20);
 
 
 /* GET stock data page. */
-router.get('/StockData/price', function(req, res) {
+router.get('/price', function(req, res) {
 	console.log("[GET] 'StockData/price'");
 	console.log(req.query);
 	var date = req.query.date.split('-').join('');
@@ -38,7 +38,7 @@ router.get('/StockData/price', function(req, res) {
 		});
 	}
 });
-router.get('/StockData/forecast', function(req, res) {
+router.get('/forecast', function(req, res) {
 	console.log("[GET] 'StockData/forecast'");
 	console.log(req.query);
 	var date = req.query.date.split('-').join('');

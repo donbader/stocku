@@ -20,7 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Route Service
 app.use('/', index);
-app.use('/', stockData);
+app.use('/StockData', stockData);
 
 
 
