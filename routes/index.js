@@ -16,5 +16,9 @@ router.get('/history', function(req, res, next){
 	res.sendFile(path.join(__dirname, '../', 'history.html'));
 });
 
+router.get('/stockid', function(req, res, next){
+	res.sendFile(path.join(__dirname, '../', 'stockid.html'));
+});
+
 
 module.exports = router;
