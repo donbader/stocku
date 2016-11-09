@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Stocku</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
     <meta name="robots" content="noindex" />
 
-    <!-- Styles -->
+    <title>Stocku</title>
+
+   <!-- Styles -->
     <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/elegant-font/code/style.css">
     <link rel="stylesheet" href="stylesheets/chart.css">
     <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
     <!-- <link rel="stylesheet" href="assets/css/magnific-popup.css"> -->
     <!-- <link rel="stylesheet" href="assets/css/form-elements.css"> -->
     <!-- <link rel="stylesheet" href="assets/css/media-queries.css"> -->
@@ -21,21 +25,25 @@
     <script src="assets/amcharts/plugins/export/export.min.js"></script>
     <script src="assets/amcharts/themes/light.js"></script>
     <script src="assets/jquery-3.1.1.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-1.12.3.js"></script> -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.7/d3.min.js" integrity="sha256-UE//NUN7Ta3VYcPjMbH1uM/uiCju935oA+LsIf55TwU=" crossorigin="anonymous"></script>
 </head>
-
 <body>
+
+<!-- the section for navigation -->
     <nav class="navbar" role="navigation">
         <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand" href="Home"></a>
             </div>
-            <div class="collapse navbar-collapse" id="top-navbar-1">
+            <div class="collapse navbar-collapse" id="top-navbar-3">
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="active">
+                    <li>
                         <a href="Home"><span aria-hidden="true" class="icon_house"></span><br>Home</a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="stockid"><span aria-hidden="true" class="icon_search"></span><br>股票代碼</a>
                     </li>
                     <li>
@@ -45,45 +53,36 @@
             </div>
         </div>
     </nav>
-    <!-- 推薦股票 -->
+
+<!-- the section for amchart -->
     <div class="block-3-container section-container what-we-do-container">
         <div class="container">
             <div class="row">
-                <h2>今日推薦：</h2>
+                <h2>&nbsp</h2>
             </div>
             <div class="row">
-                <div class="col-sm-9">
-                    <div id="chartdiv"></div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="row text-left">
-                        搜尋股票：
-                        <input id="searcher" type="search" value="2498" placeholder="3301 (大立光)">
-                        查詢日期：
-                        <input id="searcher_date" type="date">
-                        <p id="priceDatamsg"></p>
-                        <p id="forecastDatamsg"></p>
-                        <p id="accurancymsg"></p>
-                        <input id="tracker" type="checkbox" checked="true">追蹤最近
-                        <input id="trackerInterval" type="number" placeholder="interval" value="20">min.
-                        <br>圖例：
-                        <div id="legenddiv"></div>
-                    </div>
-                    <div class="row">
-                    </div>
-                </div>
+                <table id="example" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Stock ID</th>
+                            <th>Company</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Stock ID</th>
+                            <th>Company</th>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
-        </div>
-    </div>
-    <!--     <div id="controlbox">
-<input id="searcher" type="search" placeholder="3301 (大立光)" onkeydown="search(event)">
-<p id="searchermsg"></p>
-<input id="tracker" type="checkbox" checked="true">追蹤最近
-<input id="trackerInterval" type="number" placeholder="interval" value="100">min.
-</div>
--->
-    <!-- <div id="chartdiv"></div> -->
-    <!-- Footer -->
+        </div> <!-- end of tag of <div class="container"> -->
+    </div> <!-- end of tag of <div class="block-3-container section-container what-we-do-container"> -->
+
+    <!-- Here is the code for history -->
+    <script type="text/javascript" src="javascripts/idtable.js"></script>
+
     <footer>
         <div class="container">
             <div class="row">
@@ -127,10 +126,5 @@
         </div>
     </footer>
 
- <!-- JS -->
-    <script src="javascripts/home.js"></script>
-
-
 </body>
-
 </html>
