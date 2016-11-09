@@ -57,10 +57,10 @@ function search_and_response(stock_id,date){
                 lastTimeUpdate = (new Date()).getTime();
             }
             else if(response.msg == 'AlreadyUpdate'){
-
+                lastTimeUpdate = (new Date()).getTime();
             }
             else{//response.msg == 'DataNotFound'
-                 $("#stock_id").trigger("DataNotFound", ["找到不資料", ]);
+                $("#stock_id").trigger("DataNotFound", ["找到不資料", ]);
                 lastTimeUpdate = (new Date()).getTime();
             }
         }
@@ -70,7 +70,7 @@ function search_and_response(stock_id,date){
 function formalize(data){
     local_array = [];
     for(i = 0; i < data.length; i++){
-        local_array.push([data[i].date.split(' ')[1],data[i].price]);
+        local_array.push([data[i].time.split(' ')[1],data[i].price]);
     }
     return local_array;
 }
