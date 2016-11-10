@@ -33,7 +33,7 @@
         "color": "#ffffff"
       },
       "title": "價錢線",
-      "titleField": "date",
+      "titleField": "time",
       "valueField": "price"
 
     },
@@ -51,7 +51,7 @@
         "enabled":false
       },
       "title": "預測線",
-      "titleField": "date",
+      "titleField": "time",
       "valueField": "forecast"
     }
   ],
@@ -78,7 +78,7 @@
     "valueLineBalloonEnabled": true,
     "valueLineAlpha": 0.3
   },
-  "categoryField": "date",
+  "categoryField": "time",
   "categoryAxis": {
     "minPeriod": "mm",
     "parseDates": true

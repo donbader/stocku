@@ -9,7 +9,7 @@ function generateChartData(date, minuteNum, interval) {
 	// current date
 	var firstDate = date;
 	var chartData = [{
-		date: firstDate,
+		time: firstDate,
 		price: "100"
 	}];
 
@@ -38,7 +38,7 @@ function genDatum(chartData, date) {
 	var price = (ref + rand).toFixed(2);
 	var forecast = (ref + rand + Math.random() * 4 - 2).toFixed(2);
 	return {
-		date: date,
+		time: date,
 		price: price,
 		forecast: forecast
 	};
@@ -55,11 +55,11 @@ d3.json("config/generalChart.json", (style) => {
 	chart.addListener('dataUpdated', zoomChart);
 	chart.addListener('dataUpdated', calcAccurancy);
 	/* init as random data */
-	// chart.dataProvider = dataToDisplay;
-	// chart.validateData();
+	chart.dataProvider = dataToDisplay;
+	chart.validateData();
 
 	/* init as server's data */
-	$("#searcher").focus().focusout();
+	// $("#searcher").focus().focusout();
 });
 
 
@@ -72,7 +72,7 @@ var oldStartDate, oldEndDate;
 function zoomChart() {
 	if (document.getElementById('tracker').checked) {
 		var interval = document.getElementById('trackerInterval').value;
-		var lastDate = new Date(chart.dataProvider[chart.dataProvider.length - 1].date);
+		var lastDate = new Date(chart.dataProvider[chart.dataProvider.length - 1].time);
 		var startDate = new Date(lastDate)
 		startDate.setMinutes(startDate.getMinutes() - interval - 5);
 		lastDate.setMinutes(lastDate.getMinutes() + 5);
@@ -123,12 +123,14 @@ $("#searcher").on("keydown", function(event) {
 	if (event.keyCode == 13) {
 		var stock = this.value;
 		var date = $("#searcher_date").val().split('-').join('');
+		lastTimeUpdate = undefined;
 		searchHandler(stock, date);
 	}
 })
 $("#searcher").on("focusout", function() {
 	var stock = this.value;
 	var date = $("#searcher_date").val().split('-').join('');
+	lastTimeUpdate = undefined;
 	searchHandler(stock, date);
 })
 
@@ -138,6 +140,7 @@ $("#searcher_date").on("focusout", function() {
 		var stock = $("#searcher").val();
 		var date = this.value.split('-').join('');
 		// find the data
+		lastTimeUpdate = undefined;
 		searchHandler(stock, date);
 	})
 //----------------------------------------------------------------------
@@ -199,7 +202,6 @@ $("#priceDatamsg").on('DataFound', (event, msg, data) => {
 	dataToDisplay = mergeStockData(dataToDisplay);
 	chart.dataProvider = dataToDisplay;
 	chart.validateData();
-
 });
 $("#priceDatamsg").on('AlreadyUpdate', (event, msg) => {
 	$("#priceDatamsg").css('color', 'blue');
@@ -257,21 +259,21 @@ function mergeStockData(data) {
 	var merged = {};
 	var merged_arr = [];
 	data.forEach(function(item, pos) {
-		if (!merged[item.date])
-			merged[item.date] = {};
+		if (!merged[item.time])
+			merged[item.time] = {};
 
 		for (var attrName in item) {
 			if (attrName == 'stock') continue;
-			merged[item.date][attrName] = item[attrName];
+			merged[item.time][attrName] = item[attrName];
 		}
 	});
 
-	for (var date in merged) {
+	for (var time in merged) {
 		var obj;
 		merged_arr.push({
-			date: date,
-			price: merged[date].price,
-			forecast: merged[date].forecast
+			time: time,
+			price: merged[time].price,
+			forecast: merged[time].forecast
 		});
 	}
 	return merged_arr;
@@ -287,4 +289,5 @@ var refreshId = setInterval(()=>{
 	var stock = $("#searcher").val();
 	var date = $("#searcher_date").val().split('-').join('');
 	searchHandler(stock, date);
+	console.log("data updated.");
 },3000);
