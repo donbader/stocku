@@ -6,7 +6,24 @@
 }(window, function() {
 	'use strict';
 	var CHART = {
-		init : function(){},
+		init : function(){
+			Date.prototype.yyyymmdd = function (){
+				var mm = this.getMonth() + 1; // getMonth() is zero-based
+				var dd = this.getDate();
+				var yyyy = this.getFullYear();
+				return yyyy
+						+ "-" + (mm < 10 ? '0'+mm : mm)
+						+ "-" + (dd < 10 ? '0'+dd : dd)
+			}
+			Date.prototype.HHMMSS = function(){
+				var HH = this.getHours();
+				var MM = this.getMinutes();
+				var SS = this.getSeconds();
+				return (HH < 10 ? '0'+HH : HH)
+						+ ":" + (MM < 10 ? '0'+MM : MM)
+						+ ":" + (SS < 10 ? '0'+SS : SS)
+			}
+		},
 		genDataJSON: function(chartData,startString, interval, endString, elementName, bias){
 			chartData = chartData || {};
 			startString = startString || "09:00:00";
@@ -26,24 +43,29 @@
 							,parseInt(endString[1])
 							,parseInt(endString[2]));
 
-			chartData[start] = chartData[start] || {};
-			chartData[start][elementName] = Math.random()*25+75;
+			startString = start.yyyymmdd() + " " + start.HHMMSS();
+			chartData[startString] = chartData[startString] || {};
+			chartData[startString][elementName] = Math.random()*25+75;
 
 			var currTime = new Date(start);
 			var nextTime = new Date(start);
+			var currTimeString;
+			var nextTimeString;
 			for(var i=0; nextTime < end; i+=interval){
 				currTime.setMinutes(start.getMinutes() + i);
 				nextTime.setMinutes(currTime.getMinutes() + interval);
-
-				chartData[nextTime] = chartData[nextTime] || {};
+				currTimeString = currTime.yyyymmdd() + " " + currTime.HHMMSS();
+				nextTimeString = nextTime.yyyymmdd() + " " + nextTime.HHMMSS();
+				chartData[nextTimeString] = chartData[nextTimeString] || {};
 				switch(elementName){
 					case "price":
-						chartData[nextTime][elementName] = this.randomDatum(chartData[currTime][elementName], bias);
+						chartData[nextTimeString][elementName] = this.randomDatum(chartData[currTimeString][elementName], bias);
+						break;
 					case "forecast":
-						chartData[nextTime][elementName] = this.randomDatum(chartData[currTime]["price"], bias);
+						chartData[nextTimeString][elementName] = this.randomDatum(chartData[currTimeString]["price"], bias);
+						break;
 				}
 			}
-
 
 			return chartData;
 		},
@@ -73,6 +95,8 @@
 				var prevTime = new Date(prop);
 				var currTime = new Date(prop);
 				prevTime.setMinutes(prevTime.getMinutes() - interval);
+				currTime = currTime.yyyymmdd() + " " + currTime.HHMMSS();
+				prevTime = prevTime.yyyymmdd() + " " + prevTime.HHMMSS();
 
 				var bias = data[currTime].forecast - data[prevTime].price;
 				bias > 0 ? ++total : 0;
@@ -138,7 +162,10 @@
 
 		    // functions
 		    this.json = {};
-		    this.validateData = ()=>chart.validateData();
+		    this.validateData = ()=>{
+		    	chart.dataProvider = CHART.JsonToArray(this.json);
+		    	chart.validateData();
+		    }
 		    this.addGraph = (g)=>chart.addGraph(g);
 		    this.addValueAxis = (v)=>chart.addValueAxis(v);
 		    this.addLegend = (l,divId)=>{
@@ -154,8 +181,6 @@
 
 		    this.setJSON = function(JSONData){
 		    	this.json = JSONData;
-		    	chart.dataProvider = CHART.JsonToArray(JSONData);
-		    	chart.validateData();
 		    };
 		    this.addJSON = function(JSONData){
 				for(var prop in JSONData){
@@ -164,8 +189,6 @@
 						this.json[prop][inner] = JSONData[prop][inner];
 					}
 				}
-		    	chart.dataProvider = CHART.JsonToArray(this.json);
-		    	chart.validateData();
 		    };
 		    this.zoomByDates = (start, end)=>chart.zoomToDates(start, end);
 		    this.zoomByIndex = (start, end)=>chart.zoomToIndexes(start, end);
@@ -329,6 +352,7 @@
 			// track Function
 			this.trackFunction	 = function (){
 				if(checkbox.prop("checked")){
+					if(chart.instance.dataProvider === undefined) return;
 					// zoom Chart
 					var chartData = chart.instance.dataProvider;
 					var end = new Date(chartData[chartData.length - 1].time);

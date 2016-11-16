@@ -2,11 +2,12 @@
 // init
 var chart = new CHART.SerialChart("chartdiv");
 
-var priceData = CHART.genDataJSON({},"9:00:00", 1, "10:00:00","price");
-var forecastData = CHART.genDataJSON(priceData , "9:01:00", 1, "10:01:00","forecast");
-CHART.addAccuracy(priceData, 1);
-chart.addJSON(priceData);
-chart.validateData();
+// random 產生
+// var priceData = CHART.genDataJSON({},"9:00:00", 1, "10:00:00","price");
+// var forecastData = CHART.genDataJSON(priceData , "9:01:00", 1, "10:01:00","forecast");
+// CHART.addAccuracy(priceData, 1);
+// chart.addJSON(priceData);
+// chart.validateData();
 
 
 chart.addLegend(new CHART.Legend(),"legenddiv");
@@ -59,6 +60,8 @@ function getNewData(){
 			if (response.msg == 'DataFound') {
 				$("#msg").trigger("add", ["已找到股票預測資料(" + stock + ")！", "green"]);
 				chart.addJSON(response.content);
+				CHART.addAccuracy(chart.json, 1);
+				chart.validateData();
 			}
 			else if(response.msg == 'AlreadyUpdate'){
 				$("#msg").trigger("add", ["預測資料已是最新","blue"]);
@@ -83,7 +86,8 @@ searcherblock.searcher.searchFunction = function (){
 // set
 $("#msg").trigger("set", ["此為隨機產生之資料", "purple"]);
 searcherblock.$.input.val(2498);
-// searcherblock.$.date.val("2016-11-07");
+searcherblock.$.date.val("2016-11-07");
+searcherblock.$.button.mouseup();
 
 
 // -----------------------------------------------------

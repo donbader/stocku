@@ -3,12 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "forever start ./bin/www",
-	"stop": "forever stopall"
+    "start": "./node_modules/nodemon/bin/nodemon.js ./bin/www",
+    "stop": "./node_modules/nodemon/bin/nodemon.js ./bin/www",
+    "forever": "./node_modules/forever/bin/forever",
+    "nodemon": "./node_modules/nodemon/bin/nodemon.js"
   },
   "dependencies": {
     "express": "~4.14.0",
+    "forever": "^0.15.3",
     "mongodb": "^2.2.11",
+    "nodemon": "^1.11.0",
     "serve-favicon": "~2.3.0"
   }
 }
