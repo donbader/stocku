@@ -1,6 +1,7 @@
 {
   "type": "serial",
   "theme": "Black",
+  "synchronizeGrid": true,
   "marginRight": 80,
   "legend": {
     "divId": "legenddiv",
@@ -11,12 +12,24 @@
   },
   "valueAxes": [
     {
+      "id": "v1",
+      "axisAlpha": 1,
+      "gridAlpha": 0,
       "position": "left",
       "title": "Stock prices"
+    },
+    {
+      "id": "v2",
+      "axisAlpha": 1,
+      "gridAlpha": 0.1,
+      "position": "right",
+      "title": "準確率",
+      "titleRotation": "90"
     }
   ],
   "graphs": [
     {
+      "valueAxis": "v1",
       "id": "priceGraph",
       "type": "smoothedLine",
       "fillAlphas": 0,
@@ -38,6 +51,7 @@
 
     },
     {
+      "valueAxis": "v1",
       "id": "forecastGraph",
       "type": "smoothedLine",
       "lineThickness": 2,
@@ -53,6 +67,24 @@
       "title": "預測線",
       "titleField": "time",
       "valueField": "forecast"
+    },
+    {
+      "valueAxis": "v2",
+      "id": "accuracy_rateGraph",
+      "type": "smoothedLine",
+      "lineThickness": 2,
+      "fillAlphas": 0,
+      "bullet": "round",
+      "bulletBorderAlpha": 1,
+      "bulletColor": "#FFFFFF",
+      "bulletSize": 5,
+      "useLineColorForBulletBorder": true,
+      "balloon":{
+        "enabled":false
+      },
+      "title": "準確率",
+      "titleField": "time",
+      "valueField": "accuracy_rate"
     }
   ],
   "chartScrollbar": {
@@ -84,7 +116,7 @@
     "parseDates": true
   },
   "export": {
-    "enabled": true,
+    "enabled": false,
     "dateFormat": "YYYY-MM-DD HH:NN:SS"
   }
 }

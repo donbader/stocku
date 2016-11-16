@@ -4,7 +4,7 @@
     font-size   : 11px;
 }
 #legenddiv{
-    height: 100px !important; /* force that height */
+    height: 100px ; /* force that height */
     overflow: auto;
     position: relative;
     margin: 5px 0 20px 0;
@@ -14,23 +14,44 @@
     width       :40px;
 }
 
-#searcher{
-    background-image: url('../images/search.png');
+input:focus{
+    outline:none;
 }
-input[type=search],input[type=date]{
-    width: 100%;
+input[type=search]{
+    position: relative;
     height: 25px;
-    box-sizing: border-box;
     border: 2px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
-    background-color: white;
-    background-position: 2px 2px;
-    background-repeat: no-repeat;
-    padding: 2px 3px 2px 25px;
-    -webkit-transition: width 0.4s ease-in-out;
-    transition: width 0.4s ease-in-out;
+    padding: 2px 3px 2px 3px;
+}
 
+input[type=button]{
+    position: relative;
+    width: 25px;
+    height: 25px;
+    border: 0.1px solid #ccc;
+    border-radius: 4px;
+    padding: 1px 2px 1px 2px;
 }
 
 
+
+input[type=date]{
+    position: relative;
+    height: 25px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 2px 3px 2px 3px;
+}
+
+
+input[type="date"]::-webkit-clear-button {
+  -webkit-appearance: none;
+  display: none;
+}
+
+input[type=number]{
+    width: 50px;
+}

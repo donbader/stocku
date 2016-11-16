@@ -1,293 +1,101 @@
-//init
-var port = 3000;
-var chart;
-var dataToDisplay;
-$("#searcher_date").val(new Date().toISOString().split("T")[0]);
-//----------------------------------------------------------------------
-// random gen function
-function generateChartData(date, minuteNum, interval) {
-	// current date
-	var firstDate = date;
-	var chartData = [{
-		time: firstDate,
-		price: "100"
-	}];
+// -----------------------------------------------------
+// init
+var chart = new CHART.SerialChart("chartdiv");
+
+var priceData = CHART.genDataJSON({},"9:00:00", 1, "10:00:00","price");
+var forecastData = CHART.genDataJSON(priceData , "9:01:00", 1, "10:01:00","forecast");
+CHART.addAccuracy(priceData, 1);
+chart.addJSON(priceData);
+chart.validateData();
 
 
-	// and generate 500 data items
-	for (var i = 5; i <= minuteNum; i += interval) {
-		var newDate = new Date(firstDate);
-		// each time we add one minute
-		newDate.setMinutes(newDate.getMinutes() + i);
+chart.addLegend(new CHART.Legend(),"legenddiv");
+var trackerblock = chart.trackerblock = new CHART.Tracker("trackerdiv", chart);
+var searcherblock = chart.searcherblock = new CHART.SearcherWithDate("searcherdiv");
 
 
-		// add data item to the array
-		if (chartData[newDate]) {
-			chartData[newDate] = genDatum(chartData, newDate);
-		} else {
-			chartData.push(genDatum(chartData, newDate));
-		}
-	}
-	return chartData;
-}
 
-function genDatum(chartData, date) {
-	// some random number
-	var ref = parseFloat(chartData[chartData.length - 1].price);
-	var rand = Math.random() * 10 - 5;
-	var price = (ref + rand).toFixed(2);
-	var forecast = (ref + rand + Math.random() * 4 - 2).toFixed(2);
-	return {
-		time: date,
-		price: price,
-		forecast: forecast
-	};
-}
+// -----------------------------------------------------
+// Event handler
+$("#msg").on("set", function (event, msg, color){
+	var msg = '<div style="color:'+ color +'">' + msg + '</div>'
+	this.innerHTML = msg;
+})
 
-
-//----------------------------------------------------------------------
-// can be modified to Recommend
-dataToDisplay = generateChartData(new Date(), 400, 5);
-
-// chart init
-d3.json("config/generalChart.json", (style) => {
-	chart = AmCharts.makeChart("chartdiv", style);
-	chart.addListener('dataUpdated', zoomChart);
-	chart.addListener('dataUpdated', calcAccurancy);
-	/* init as random data */
-	chart.dataProvider = dataToDisplay;
-	chart.validateData();
-
-	/* init as server's data */
-	// $("#searcher").focus().focusout();
+$("#msg").on("add", function(event, msg, color){
+	var msg = '<div style="color:'+ color +'">' + msg + '</div>'
+	this.innerHTML = this.innerHTML + "<br>" + msg;
 });
-
-
-
-// event handler
-//----------------------------------------------------------------------
-// zoom
-var oldStartDate, oldEndDate;
-
-function zoomChart() {
-	if (document.getElementById('tracker').checked) {
-		var interval = document.getElementById('trackerInterval').value;
-		var lastDate = new Date(chart.dataProvider[chart.dataProvider.length - 1].time);
-		var startDate = new Date(lastDate)
-		startDate.setMinutes(startDate.getMinutes() - interval - 5);
-		lastDate.setMinutes(lastDate.getMinutes() + 5);
-		chart.zoomToDates(startDate, lastDate);
-		recordDate();
-	} else {
-		chart.zoomToDates(oldStartDate, oldEndDate);
-	}
-}
-// record last value
-function recordDate() {
-	oldStartDate = new Date(chart.startDate);
-	oldEndDate = new Date(chart.endDate);
-}
-//----------------------------------------------------------------------
-// calculate 準確率
-function calcAccurancy() {
-	var mergedData = chart.dataProvider;
-	if (mergedData.length < 2) return;
-	var accurancy = {
-		size: 0,
-		total: 0
-	};
-
-	for (var i in mergedData) {
-		if (!mergedData[i].forecast || !mergedData[i].price) continue;
-		var forecast_delta = mergedData[i].forecast - mergedData[i - 1].price;
-		var price_delta = mergedData[i].price - mergedData[i - 1].price;
-		if (forecast_delta * price_delta > 0)
-			++accurancy.total;
-
-		++accurancy.size;
-
-	}
-	accurancy.rate = accurancy.total / accurancy.size;
-	$('#accurancymsg').trigger('CalcDone', accurancy.rate);
-	return accurancy;
-}
-
-//----------------------------------------------------------------------
-$("#trackerInterval").on("change", () => {
-	zoomChart();
-})
-
-//----------------------------------------------------------------------
-// #searcher event
-$("#searcher").on("keydown", function(event) {
-	if (event.keyCode == 13) {
-		var stock = this.value;
-		var date = $("#searcher_date").val().split('-').join('');
-		lastTimeUpdate = undefined;
-		searchHandler(stock, date);
-	}
-})
-$("#searcher").on("focusout", function() {
-	var stock = this.value;
-	var date = $("#searcher_date").val().split('-').join('');
-	lastTimeUpdate = undefined;
-	searchHandler(stock, date);
-})
-
-//----------------------------------------------------------------------
-// #searcher_date event
-$("#searcher_date").on("focusout", function() {
-		var stock = $("#searcher").val();
-		var date = this.value.split('-').join('');
-		// find the data
-		lastTimeUpdate = undefined;
-		searchHandler(stock, date);
-	})
-//----------------------------------------------------------------------
-var lastTimeUpdate;
-function searchHandler(stock_num, date) {
-	// 記錄當前zoom的起迄
-	recordDate();
-	dataToDisplay = [];
+// -----------------------------------------------------
+// update Function
+function getNewData(){
+	var stock = searcherblock.$.input.val();
+	var date = searcherblock.$.date.val();
 	$.get("/StockData/price", {
-			stock: stock_num,
+			stock: stock,
 			date: date,
 			lastTimeUpdate: lastTimeUpdate,
 		},
 		(response) => {
 			if (response.msg == 'DataFound') {
-				$("#priceDatamsg").trigger("DataFound", ["", response.content]);
+				$("#msg").trigger("set", ["已找到股票(" + stock + ")！", "green"]);
+				chart.setJSON(response.content);
 				lastTimeUpdate = (new Date()).getTime();
 			}
 			else if(response.msg == 'AlreadyUpdate'){
-				$("#priceDatamsg").trigger("AlreadyUpdate", "");
+				$("#msg").trigger("set", ["資料已是最新", "blue"]);
 			}
 			else {
-				$("#priceDatamsg").trigger("DataNotFound", "沒有找到此股票(" + stock_num + ")！");
+				$("#msg").trigger("set", ["沒有找到此股票(" + stock + ")！", "red"]);
 			}
 		}
 	);
 	$.get("/StockData/forecast", {
-			stock: stock_num,
+			stock: stock,
 			date: date,
 			lastTimeUpdate: lastTimeUpdate,
 		},
 		(response) => {
 			if (response.msg == 'DataFound') {
-				$("#forecastDatamsg").trigger("DataFound", ["", response.content]);
-				lastTimeUpdate = (new Date()).getTime();
+				$("#msg").trigger("add", ["已找到股票預測資料(" + stock + ")！", "green"]);
+				chart.addJSON(response.content);
 			}
 			else if(response.msg == 'AlreadyUpdate'){
-				$("#forecastDatamsg").trigger("AlreadyUpdate", "");
+				$("#msg").trigger("add", ["預測資料已是最新","blue"]);
 			}
 			else {
-				$("#forecastDatamsg").trigger("DataNotFound", "沒有找到股票預測資料(" + stock_num + ")！");
+				$("#msg").trigger("add", ["沒有找到此股票預測資料(" + stock + ")！","red"]);
 			}
 		}
 	);
 
 }
-//----------------------------------------------------------------------
-// data not found event
-$("#priceDatamsg").on('DataNotFound', (event, msg) => {
-		$("#priceDatamsg").css('color', 'red');
-		$("#priceDatamsg").html(msg);
-	})
-	// data found event
-$("#priceDatamsg").on('DataFound', (event, msg, data) => {
-	$("#priceDatamsg").css('color', 'green');
-	$("#priceDatamsg").html(msg);
-	// render
-	dataToDisplay = dataToDisplay.concat(data);
-	dataToDisplay = mergeStockData(dataToDisplay);
-	chart.dataProvider = dataToDisplay;
-	chart.validateData();
-});
-$("#priceDatamsg").on('AlreadyUpdate', (event, msg) => {
-	$("#priceDatamsg").css('color', 'blue');
-	$("#priceDatamsg").html(msg);
 
-	// do nothing
-});
-//----------------------------------------------------------------------
-// data not found event
-$("#forecastDatamsg").on('DataNotFound', (event, msg) => {
-		$("#forecastDatamsg").css('color', 'red');
-		$("#forecastDatamsg").html(msg);
-	})
-	// data found event
-$("#forecastDatamsg").on('DataFound', (event, msg, data) => {
-	$("#forecastDatamsg").css('color', 'green');
-	$("#forecastDatamsg").html(msg);
-	// render
-	dataToDisplay = dataToDisplay.concat(data);
-	dataToDisplay = mergeStockData(dataToDisplay);
-	chart.dataProvider = dataToDisplay;
-	chart.validateData();
-});
-
-$("#forecastDatamsg").on('AlreadyUpdate', (event, msg) => {
-	$("#forecastDatamsg").css('color', 'blue');
-	$("#forecastDatamsg").html(msg);
-
-	// do nothing
-});
-
-//----------------------------------------------------------------------
-$('#accurancymsg').on('CalcDone', function(event, rate) {
-	var msg;
-	switch (true) {
-		case rate < 0.5:
-			$(this).css('color', 'red');
-			break;
-		case rate >= 0.5 && rate < 0.85:
-			$(this).css('color', 'orange');
-			break;
-		case rate >= 0.85:
-			$(this).css('color', 'green');
-			break;
-		default:
-			$(this).html('準確率計算Error！');
-			return;
-	}
-	msg = (rate * 100).toFixed(2) + '%';
-	$(this).html('準確率：' + msg);
-});
-//----------------------------------------------------------------------
-// merge data
-function mergeStockData(data) {
-	var merged = {};
-	var merged_arr = [];
-	data.forEach(function(item, pos) {
-		if (!merged[item.time])
-			merged[item.time] = {};
-
-		for (var attrName in item) {
-			if (attrName == 'stock') continue;
-			merged[item.time][attrName] = item[attrName];
-		}
-	});
-
-	for (var time in merged) {
-		var obj;
-		merged_arr.push({
-			time: time,
-			price: merged[time].price,
-			forecast: merged[time].forecast
-		});
-	}
-	return merged_arr;
+// searchFunction override
+var lastTimeUpdate;
+searcherblock.searcher.searchFunction = function (){
+	lastTimeUpdate = undefined;
+	getNewData();
 }
 
 
+// -----------------------------------------------------
+// set
+$("#msg").trigger("set", ["此為隨機產生之資料", "purple"]);
+searcherblock.$.input.val(2498);
+// searcherblock.$.date.val("2016-11-07");
 
 
-//----------------------------------------------------------------------
+// -----------------------------------------------------
+// loop
 
-// for 3s a time loop
+// for 3s a time loop update server's data
 var refreshId = setInterval(()=>{
-	var stock = $("#searcher").val();
-	var date = $("#searcher_date").val().split('-').join('');
-	searchHandler(stock, date);
-	console.log("data updated.");
+	getNewData();
 },3000);
+
+// -----------------------------------------------------
+
+// for 3s a time loop update random data
+
+
