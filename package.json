@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "forever start ./bin/www",
+	"stop": "forever stopall"
   },
   "dependencies": {
     "express": "~4.14.0",
