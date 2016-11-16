@@ -23,6 +23,9 @@
 						+ ":" + (MM < 10 ? '0'+MM : MM)
 						+ ":" + (SS < 10 ? '0'+SS : SS)
 			}
+			Date.prototype.yyyymmddHHMMSS = function(){
+				return this.yyyymmdd() + " " + this.HHMMSS();
+			}
 		},
 		genDataJSON: function(chartData,startString, interval, endString, elementName, bias){
 			chartData = chartData || {};
@@ -43,7 +46,7 @@
 							,parseInt(endString[1])
 							,parseInt(endString[2]));
 
-			startString = start.yyyymmdd() + " " + start.HHMMSS();
+			startString = start.yyyymmddHHMMSS();
 			chartData[startString] = chartData[startString] || {};
 			chartData[startString][elementName] = Math.random()*25+75;
 
@@ -54,8 +57,8 @@
 			for(var i=0; nextTime < end; i+=interval){
 				currTime.setMinutes(start.getMinutes() + i);
 				nextTime.setMinutes(currTime.getMinutes() + interval);
-				currTimeString = currTime.yyyymmdd() + " " + currTime.HHMMSS();
-				nextTimeString = nextTime.yyyymmdd() + " " + nextTime.HHMMSS();
+				currTimeString = currTime.yyyymmddHHMMSS();
+				nextTimeString = nextTime.yyyymmddHHMMSS();
 				chartData[nextTimeString] = chartData[nextTimeString] || {};
 				switch(elementName){
 					case "price":
@@ -85,24 +88,42 @@
 			}
 			return arr;
 		},
-		addAccuracy: function(data, interval){
+		calcAccuracy: function(data, interval){
 			var interval = interval || 1;
 			var total = 0;
 			var size = 0;
+			var json = {};
 			for(var prop in data){
-				if(!data[prop].price || !data[prop].forecast)
+				if(data[prop].hit_acc !== undefined && data[prop].hit_acc_size !== undefined){
 					continue;
+				}
+				if(data[prop].price === undefined || data[prop].forecast === undefined){
+					json[prop] = {hit_acc: total, hit_acc_size: size};
+					continue;
+				}
+
+				// iter
 				var prevTime = new Date(prop);
 				var currTime = new Date(prop);
 				prevTime.setMinutes(prevTime.getMinutes() - interval);
-				currTime = currTime.yyyymmdd() + " " + currTime.HHMMSS();
-				prevTime = prevTime.yyyymmdd() + " " + prevTime.HHMMSS();
+				currTime = currTime.yyyymmddHHMMSS();
+				prevTime = prevTime.yyyymmddHHMMSS();
 
-				var bias = data[currTime].forecast - data[prevTime].price;
-				bias > 0 ? ++total : 0;
+				if(data[prevTime].hit_acc !== undefined && data[prevTime].hit_acc_size !== undefined){
+					total = data[prevTime].hit_acc;
+					size = data[prevTime].hit_acc_size;
+				}
+
+				var bias_forecast = data[currTime].forecast - data[prevTime].price;
+				var bias_real = data[currTime].price - data[prevTime].price;
+				bias_forecast*bias_real > 0 ? ++total : 0;
 				++size;
-				data[prop].accuracy = parseFloat((total/size).toFixed(2));
+				json[currTime] = json[currTime] || {};
+				json[currTime].hit_acc = total;
+				json[currTime].hit_acc_size = size;
+				json[currTime].accuracy = parseFloat((total/size).toFixed(2));
 			}
+			return json;
 		},
 		SerialChart: function(id){
 			//init
@@ -120,6 +141,8 @@
 		    this.instance = chart;
 
 		    // init
+		    var prevStartDate;
+		    var prevEndDate;
 		    chart.hideCredits = true;
 		    chart.categoryField = "time";
 		    chart.categoryAxis.minPeriod = "mm";
@@ -162,7 +185,10 @@
 
 		    // functions
 		    this.json = {};
+		    this.jsonData = ()=>this.json;
+		    this.arrayData = ()=>chart.dataProvider;
 		    this.validateData = ()=>{
+		    	oldDate = {startDate: chart.startDate, endDate: chart.endDate};
 		    	chart.dataProvider = CHART.JsonToArray(this.json);
 		    	chart.validateData();
 		    }
@@ -192,6 +218,8 @@
 		    };
 		    this.zoomByDates = (start, end)=>chart.zoomToDates(start, end);
 		    this.zoomByIndex = (start, end)=>chart.zoomToIndexes(start, end);
+		    var oldDate;
+		    this.zoomByOldDates = ()=>chart.zoomToDates(oldDate.startDate, oldDate.endDate);
 
 		},
 		Graph: function(config){
@@ -338,19 +366,19 @@
 			$('#'+divId).append('min');
 
 			input.on({
-				focusout: (event)=>scope.trackFunction(event),
+				focusout: (event)=>scope.track(event),
 				keydown: (event)=>{
 					if(event.keyCode == 13)
-						scope.trackFunction(event);
+						scope.track(event);
 				}
 			});
 			checkbox.on('change', function(event){
 				if(this.checked)
-					scope.trackFunction(event);
+					scope.track(event);
 			});
 
-			// track Function
-			this.trackFunction	 = function (){
+			// zoom Function
+			this.track = function (event){
 				if(checkbox.prop("checked")){
 					if(chart.instance.dataProvider === undefined) return;
 					// zoom Chart
@@ -361,8 +389,10 @@
 					end.setMinutes(end.getMinutes() + 1);
 					chart.zoomByDates(start, end);
 				}
+				else{
+					chart.zoomByOldDates();
+				}
 			}
-			this.trackFunction();
 		}
 
 

@@ -1,20 +1,27 @@
-// -----------------------------------------------------
-// init
+/**************************************************
+ *              INIT                              *
+ **************************************************/
 var chart = new CHART.SerialChart("chartdiv");
 
 // random 產生
-// var priceData = CHART.genDataJSON({},"9:00:00", 1, "10:00:00","price");
-// var forecastData = CHART.genDataJSON(priceData , "9:01:00", 1, "10:01:00","forecast");
-// CHART.addAccuracy(priceData, 1);
-// chart.addJSON(priceData);
-// chart.validateData();
+var priceData = CHART.genDataJSON({},"9:00:00", 1, "10:00:00","price");
+var forecastData = CHART.genDataJSON(priceData , "9:01:00", 1, "10:01:00","forecast");
+chart.addJSON(priceData);
+chart.addJSON(CHART.calcAccuracy(priceData,1));
+
+chart.validateData();
 
 
 chart.addLegend(new CHART.Legend(),"legenddiv");
-var trackerblock = chart.trackerblock = new CHART.Tracker("trackerdiv", chart);
-var searcherblock = chart.searcherblock = new CHART.SearcherWithDate("searcherdiv");
+var searcherblock = chart.searcherblock = new CHART.Searcher("searcherdiv");
+var tracker = chart.tracker = new CHART.Tracker("trackerdiv", chart);
+tracker.track();
 
 
+
+/**************************************************
+ *              EVENT                             *
+ **************************************************/
 
 // -----------------------------------------------------
 // Event handler
@@ -27,6 +34,7 @@ $("#msg").on("add", function(event, msg, color){
 	var msg = '<div style="color:'+ color +'">' + msg + '</div>'
 	this.innerHTML = this.innerHTML + "<br>" + msg;
 });
+
 // -----------------------------------------------------
 // update Function
 function getNewData(){
@@ -60,7 +68,7 @@ function getNewData(){
 			if (response.msg == 'DataFound') {
 				$("#msg").trigger("add", ["已找到股票預測資料(" + stock + ")！", "green"]);
 				chart.addJSON(response.content);
-				CHART.addAccuracy(chart.json, 1);
+				chart.addJSON(CHART.calcAccuracy(chart.jsonData(),1));
 				chart.validateData();
 			}
 			else if(response.msg == 'AlreadyUpdate'){
@@ -76,7 +84,7 @@ function getNewData(){
 
 // searchFunction override
 var lastTimeUpdate;
-searcherblock.searcher.searchFunction = function (){
+searcherblock.searchFunction = function (){
 	lastTimeUpdate = undefined;
 	getNewData();
 }
@@ -85,21 +93,51 @@ searcherblock.searcher.searchFunction = function (){
 // -----------------------------------------------------
 // set
 $("#msg").trigger("set", ["此為隨機產生之資料", "purple"]);
-searcherblock.$.input.val(2498);
-searcherblock.$.date.val("2016-11-07");
-searcherblock.$.button.mouseup();
+// searcherblock.$.input.val(2498);
+// searcherblock.$.date.val("2016-11-07");
+// searcherblock.$.button.mouseup();
 
 
-// -----------------------------------------------------
-// loop
+/**************************************************
+ *              GAME LOOP                         *
+ **************************************************/
 
 // for 3s a time loop update server's data
-var refreshId = setInterval(()=>{
-	getNewData();
-},3000);
+// var refreshId = setInterval(()=>{
+// 	getNewData();
+// },3000);
 
 // -----------------------------------------------------
 
 // for 3s a time loop update random data
+var refreshId = setInterval(()=>{
+	var arr = chart.arrayData();
+	var lastData = arr[arr.length - 1];
+	// Price
+	var currForecast = lastData.forecast;
+	var currPrice = arr[arr.length - 2].price + (Math.random() *10 - 5);
+	var nextForecast = currPrice + (Math.random() *10 - 5);
 
+	currPrice = parseFloat(currPrice.toFixed(2));
+	nextForecast = parseFloat(nextForecast.toFixed(2));
+
+	// Time
+	var currTime = new Date(lastData.time);
+	var nextTime = new Date(lastData.time);
+	nextTime.setMinutes(nextTime.getMinutes() + 1);
+	currTime = currTime.yyyymmddHHMMSS();
+	nextTime = nextTime.yyyymmddHHMMSS();
+
+	// new Data
+	var newData = {};
+	newData[arr[arr.length - 2].time] = arr[arr.length - 2];
+	newData[currTime] = {price: currPrice, forecast: currForecast};
+	newData[nextTime] = {forecast: nextForecast};
+
+	chart.addJSON(newData);
+	chart.addJSON(CHART.calcAccuracy(newData, 1));
+	chart.validateData();
+	tracker.track();
+
+}, 3000);
 
