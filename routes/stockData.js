@@ -4,7 +4,7 @@ var fs = require('fs');
 var router = express.Router();
 
 var updateTime = new Date();
-updateTime.setSeconds(updateTime.getSeconds() + 20);
+// updateTime.setSeconds(updateTime.getSeconds() + 20);
 
 
 /* GET stock data page. */
@@ -181,6 +181,10 @@ function filter(data, startTime, endTime){
 		var time = new Date(element.time).getTime();
 		return time >= startTime && time <= endTime;
 	});
+}
+
+router.setUpdateTime = function(date){
+	updateTime = date;
 }
 
 module.exports = router;
