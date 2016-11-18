@@ -1,117 +1,55 @@
 /**************************************************
  *              FIRST INITIALZATION               *
  **************************************************/
-var chart;
-$(document).ready(function(){
-    //fill default date
-    $("#stock_date").val(new Date().toISOString().split("T")[0]);
-    //fill default stock id
-    $("#stock_id").val(2498);
-    //config chart style and init
-    d3.json("config/generalChart_no_legend.json", (style) => {
-        chart = AmCharts.makeChart("chartdiv", style);
-        chart.addListener('dataUpdated', zoomChart);
-        /* init as server's data */
-        $("#stock_id").focus().focusout();
-    });
-    search();
-});
+var chart = new STOCKU.ChartInMinuteScale("chartdiv");
+var searcherblock = new STOCKU.SearcherWithDate("searcherdiv");
 
 
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
 
-//--------------------------------------------------
-var oldStartDate, oldEndDate;
-function zoomChart() {
-    chart.zoomToDates(oldStartDate, oldEndDate);
+function getPrice(stock, date) {
+    console.log("Getting Price...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/price", {
+                stock: stock,
+                date: date
+            })
+            .done((response) => {
+                if (response.msg == "DataFound")
+                    resolve(response.content);
+                else if (response.msg == "DataNotFound") {
+                    reject(response);
+                }
+            })
+            .fail(() => {
+                reject("[getPrice] Error!");
+            });
+    });
 }
-//--------------------------------------------------
-function recordDate() {
-    oldStartDate = new Date(chart.startDate);
-    oldEndDate = new Date(chart.endDate);
+
+
+function getForecast(stock, date) {
+    console.log("Getting Forecast...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/forecast", {
+                stock: stock,
+                date: date
+            })
+            .done((response) => {
+                if (response.msg == "DataFound")
+                    resolve(response.content);
+                else if (response.msg == "DataNotFound") {
+                    reject(response);
+                }
+
+            })
+            .fail(() => {
+                reject("[getPrice] Error!");
+            });
+    });
 }
-//--------------------------------------------------
-function search(){
-    var stock_id = $("#stock_id").val();
-    var date = $("#stock_date").val().split('-').join('');
-    log("#stock_id : " + stock_id,false);
-    log("#stock_date : " + date,false);
-    search_and_response(stock_id,date);
-}
-//--------------------------------------------------
-//send query to server and response
-function search_and_response(stock_id,date){
-    var lastTimeUpdate;
-    $.get("/StockData/price", {
-            stock: stock_id,
-            date: date,
-            lastTimeUpdate: lastTimeUpdate,
-        },
-        (response) => {
-            log(response.msg,false);
-            log(response.content,false);
-            if(response.msg == 'DataFound'){
-                $("#stock_id").trigger("DataFound", ["找到資料", response.content]);
-                lastTimeUpdate = (new Date()).getTime();
-            }
-            else if(response.msg == 'AlreadyUpdate'){
-                lastTimeUpdate = (new Date()).getTime();
-            }
-            else{//response.msg == 'DataNotFound'
-                $("#stock_id").trigger("DataNotFound", ["找到不資料", ]);
-                lastTimeUpdate = (new Date()).getTime();
-            }
-        }
-    );
-}
-//--------------------------------------------------
-function formalize(data){
-    local_array = [];
-    for(i = 0; i < data.length; i++){
-        local_array.push([data[i].time.split(' ')[1],data[i].price]);
-    }
-    return local_array;
-}
-//--------------------------------------------------
-function genTable(){
-    $('#example').dataTable().fnDestroy();
-    $('#example').DataTable( {
-        "ajax":             "tables/data.txt",
-        'aoColumns': [
-            { sWidth: "50%", bSearchable: false, bSortable: true },
-            { sWidth: "50%", bSearchable: false, bSortable: true }
-        ],
-        "bSort":            false,
-        "scrollY":          "200px",
-        "scrollCollapse":   false,
-        "info":             false,
-        "ordering":         true,
-        "paging":           false,
-        "searching":        false
-    } );
-}
-//--------------------------------------------------
-function genTable(data){
-    var dataSet = formalize(data);
-    $('#example').dataTable().fnDestroy();
-    $('#example').DataTable( {
-        'data':             dataSet,
-        'aoColumns': [
-            { sWidth: "50%", bSearchable: false, bSortable: true },
-            { sWidth: "50%", bSearchable: false, bSortable: true }
-        ],
-        "bSort":            false,
-        "scrollY":          "200px",
-        "scrollCollapse":   false,
-        "info":             false,
-        "ordering":         true,
-        "paging":           false,
-        "searching":        false
-    } );
-}
-//--------------------------------------------------
 
 /**************************************************
  *              DEBUG FUNCTION                    *
@@ -120,28 +58,82 @@ function genTable(data){
 //false !!
 var enable_debug = true;
 //--------------------------------------------------
-function log(msg,debug=true){
-    if(debug && enable_debug)
+function log(msg, debug = true) {
+    if (debug && enable_debug)
         console.log(msg);
 }
 /**************************************************
  *              DEPLOY EVENT                      *
  **************************************************/
-$("#stock_id").keyup(search);
-//--------------------------------------------------
-$("#stock_id").on('DataFound', (event, msg, data) => {
-    $("#logmsg").css('color', 'green');
-    $("#logmsg").html(msg);
-    genTable(data);
-    chart.dataProvider = data;
-    chart.validateData();
+
+$("#logmsg").on("set", function(event, msg, color) {
+    var msg = '<div style="color:' + color + '">' + msg + '</div>'
+    this.innerHTML = msg;
+})
+
+$("#logmsg").on("add", function(event, msg, color) {
+    var msg = '<div style="color:' + color + '">' + msg + '</div>'
+    this.innerHTML = this.innerHTML + "<br>" + msg;
 });
+
+// Override search();
+searcherblock.searcher.search = function (){
+    // clear data
+    chart.jsonData = {};
+    var stock = searcherblock.$.input.val();
+    var date = searcherblock.$.date.val();
+    getPrice(stock, date)
+        .then(
+            (data) => {
+                chart.addJsonData(data);
+                $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
+                return getForecast(stock, date);
+            },
+            (response) =>{
+                $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
+                return getForecast(stock, date);
+            }
+        )
+        .then(
+            (data) => {
+                chart.addJsonData(data);
+                // 準確率計算
+                chart.addJsonData(STOCKU.calcAccuracy(chart.jsonData, 1));
+                $("#logmsg").trigger("add", ["找到預測資料", "green"]);
+            },
+            (response) =>{
+                $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
+            }
+        )
+
+
+}
+
+/**************************************************
+ *              MAIN                              *
+ **************************************************/
+// set up searcher block
+searcherblock.$.input.val(2498);
+searcherblock.$.date.val("2016-11-18");
+searcherblock.$.button.mouseup();
+
 //--------------------------------------------------
-$("#stock_id").on('DataNotFound', (event, msg, data) => {
-    $("#logmsg").css('color', 'red');
-    $("#logmsg").html(msg);
-});
-//--------------------------------------------------
-$("#stock_date").change(search);
-//--------------------------------------------------
+
+// Random Data
+// Random Data
+// var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
+// var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
+// priceData = STOCKU.ObjectCombine(priceData, forecastData);
+
+// var accuracyData = STOCKU.calcAccuracy(priceData, 1);
+// chart.addJsonData(forecastData);
+// chart.addJsonData(priceData);
+// chart.addJsonData(accuracyData);
+// $("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
+
+
+
+
+
+
 

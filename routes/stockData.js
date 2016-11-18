@@ -8,7 +8,7 @@ updateTime.setSeconds(updateTime.getSeconds() + 20);
 
 
 /* GET stock data page. */
-router.get('/price', function(req, res) {
+router.get('/price_2', function(req, res) {
 	console.log("[GET] 'StockData/price'");
 	console.log(req.query);
 	var date = req.query.date.split('-').join('');
@@ -38,7 +38,7 @@ router.get('/price', function(req, res) {
 		});
 	}
 });
-router.get('/forecast', function(req, res) {
+router.get('/forecast_2', function(req, res) {
 	console.log("[GET] 'StockData/forecast'");
 	console.log(req.query);
 	var date = req.query.date.split('-').join('');
@@ -69,48 +69,78 @@ router.get('/forecast', function(req, res) {
 	}
 });
 
-router.get('/price/range', function(req, res){
-	var date = req.query.date;
-	var stock = req.query.stock;
-	var startTime = req.query.startTime;
-	var endTime = req.query.endTime;
-
-	var file_path =  'database/' + date + '_' + stock + '.csv';
+router.get('/price', function(req, res) {
+	process.stdout.write("[GET] 'StockData/price'   \t");
 	console.log(req.query);
-	fs.readFile(file_path, 'utf-8', (err, csv)=>{
+	var date = req.query.date.split('-').join('');
+	var stock = req.query.stock;
+	var lastTimeUpdate = req.query.lastTimeUpdate;
+	var file_path = 'database/price/' + date + '_' + stock + '.csv';
+	fs.readFile(file_path,'utf-8', (err, data)=>{
 		if(err){
-			res.send(err);
+			console.error(err);
+			res.send({
+				msg: 'DataNotFound',
+				stock: stock,
+				date: date
+			})
 			return;
 		}
-		var data = parseCSV(csv);
-		data = filter(data, startTime, endTime);
-		res.send(data);
-	});
 
-});
-
-router.get('/forecast/range', function(req, res){
-	var date = req.query.date;
-	var stock = req.query.stock;
-	var startTime = req.query.startTime;
-	var endTime = req.query.endTime;
-
-	var file_path =  'database/' + date + '_' + stock + '.forecast.csv';
-	console.log(req.query);
-	fs.readFile(file_path, 'utf-8', (err, csv)=>{
-		if(err){
-			res.send(err);
-			return;
+		if(!lastTimeUpdate
+			|| (Number(lastTimeUpdate) < updateTime.getTime()
+			&& (new Date()).getTime() > updateTime.getTime())){
+			res.send({
+				msg: 'DataFound',
+				stock: stock,
+				date: date,
+				content: parseCSVToJSON(data)
+			});
 		}
-		var data = parseCSV(csv);
-		data = filter(data, startTime, endTime);
-		res.send(data);
+		else{
+			res.send({
+				msg: 'AlreadyUpdate'
+			});
+		}
+
 	});
 });
 
-router.post('/accuracy', function(req, res){
-	
-})
+router.get('/forecast', function(req, res) {
+	process.stdout.write("[GET] 'StockData/forecast'\t");
+	console.log(req.query);
+	var date = req.query.date.split('-').join('');
+	var stock = req.query.stock;
+	var lastTimeUpdate = req.query.lastTimeUpdate;
+	var file_path = 'database/forecast/' + date + '_' + stock + '.fc.csv';
+	fs.readFile(file_path,'utf-8', (err, data)=>{
+		if(err){
+			console.error(err);
+			res.send({
+				msg: 'DataNotFound'
+			})
+			return;
+		}
+		if(!lastTimeUpdate
+			|| (Number(lastTimeUpdate) < updateTime.getTime()
+			&& (new Date()).getTime() > updateTime.getTime())){
+			res.send({
+				msg: 'DataFound',
+				stock: stock,
+				date: date,
+				content: parseCSVToJSON(data)
+			});
+		}
+		else{
+			res.send({
+				msg: 'AlreadyUpdate'
+			});
+		}
+	});
+});
+
+
+
 
 function parseCSV(data, delimiter){
 	data = data.split('\n');

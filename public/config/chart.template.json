@@ -1,0 +1,26 @@
+{
+  "type": "serial",
+  "categoryField": "time",
+  "categoryAxis": {
+    "minPeriod": "mm",
+    "parseDates": true
+  },
+  "hideCredits": true,
+  "chartCursor": {
+    "enabled": true,
+    "valueLineEnabled": true,
+    "valueLineBalloonEnabled": true
+  },
+  "chartScrollbar": {
+    "enabled": true,
+    "scrollbarHeight": 30,
+    "autoGridCount": true
+  },
+  "trendLines": [],
+  "graphs": [],
+  "guides": [],
+  "valueAxes": [],
+  "allLabels": [],
+  "balloon": {},
+  "titles": []
+}
