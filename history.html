@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="robots" content="noindex" />
+
+    <title>Stocku</title>
+
+   <!-- Styles -->
+    <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/elegant-font/code/style.css">
+    <link rel="stylesheet" href="stylesheets/chart.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+    <!-- <link rel="stylesheet" href="assets/css/magnific-popup.css"> -->
+    <!-- <link rel="stylesheet" href="assets/css/form-elements.css"> -->
+    <!-- <link rel="stylesheet" href="assets/css/media-queries.css"> -->
+    <!-- Resources -->
+    <script src="assets/amcharts/amcharts.js"></script>
+    <script src="assets/amcharts/serial.js"></script>
+    <script src="assets/amcharts/amstock.js"></script>
+    <script src="assets/amcharts/plugins/export/export.min.js"></script>
+    <script src="assets/amcharts/themes/light.js"></script>
+    <script src="assets/jquery-3.1.1.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-1.12.3.js"></script> -->
+<!--     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.7/d3.min.js" integrity="sha256-UE//NUN7Ta3VYcPjMbH1uM/uiCju935oA+LsIf55TwU=" crossorigin="anonymous"></script>
+ --></head>
+<body>
+
+<!-- the section for navigation -->
+    <nav class="navbar" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="Home"></a>
+            </div>
+            <div class="collapse navbar-collapse" id="top-navbar-3">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="Home"><span aria-hidden="true" class="icon_house"></span><br>Home</a>
+                    </li>
+                    <li>
+                        <a href="stockid"><span aria-hidden="true" class="icon_search"></span><br>股票代碼</a>
+                    </li>
+                    <li class="active">
+                        <a href="history"><span aria-hidden="true" class="icon_documents"></span><br>歷史紀錄</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+<!-- the section for amchart -->
+    <div class="block-3-container section-container what-we-do-container">
+        <div class="container">
+            <div class="row">
+                <h2>&nbsp</h2>
+            </div>
+            <div class="row">
+                <div class="col-sm-9">
+                    <div id="chartdiv"></div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="row orm-group text-left">
+                        請輸入股票代碼 & 查詢日期：
+                        <div id="searcherdiv"></div>
+                        <div id="legenddiv"></div>
+                        狀態：
+                        <div id="logmsg"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div> <!-- end of tag of <div class="container"> -->
+    </div> <!-- end of tag of <div class="block-3-container section-container what-we-do-container"> -->
+
+    <!-- Here is the code for history -->
+    <script type="text/javascript" src="javascripts/stocku.js"></script>
+    <script type="text/javascript" src="javascripts/history.js"></script>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4 footer-box">
+                    <h4>WARNING</h4>
+                    <div class="footer-box-text">
+                        <p>以上資料僅供參考</p>
+                        <p>投資一定有風險，基金投資有賺有賠，申購前應詳閱公開說明書</p>
+                    </div>
+                </div>
+                <div class="col-sm-4 footer-box">
+                    <div class="footer-box-text">
+                        <h4>MEMBERS</h4>
+                        <ul>
+                            <li>李高丞&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>彭建瑋&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>馮禹德&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>賴俊愷&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>余俊毅&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                        </ul>
+                        <p><a href="about.html">About Us</a></p>
+                    </div>
+                </div>
+                <div class="col-sm-4 footer-box">
+                    <h4>HANDY LINK</h4>
+                    <a>Link</a>
+                    <a>Link</a>
+                    <a>Link</a>
+                    <a>Link</a>
+                    <a>Link</a>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 wow fadeIn">
+                    </div>
+                </div>
+                <div class="col-sm-12 footer-copyright">
+                    <div class="footer-border"></div>
+                    <p>&copy; Stocku - All rights reserved. </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

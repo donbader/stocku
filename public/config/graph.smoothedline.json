@@ -1,0 +1,23 @@
+{
+  "graphs": [
+    {
+      "type": "smoothedLine",
+
+      "id": "smoothedLine_",
+      "title": "",
+
+      "balloonText": "[[title]]: [[value]]",
+      "balloon": {
+        "borderThickness": 0.2,
+        "cornerRadius": 10,
+        "shadowAlpha": 0,
+        "fillColor": "#000000",
+        "color": "#ffffff"
+      },
+      "lineThickness": 3,
+      "bullet": "round",
+
+      "valueField": ""
+    }
+  ]
+}

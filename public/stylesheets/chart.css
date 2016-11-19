@@ -1,0 +1,43 @@
+
+
+input:focus{
+    outline:none;
+}
+input[type=search]{
+    position: relative;
+    height: 25px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 2px 3px 2px 3px;
+}
+
+input[type=button]{
+    position: relative;
+    width: 25px;
+    height: 25px;
+    border: 0.1px solid #ccc;
+    border-radius: 4px;
+    padding: 1px 2px 1px 2px;
+}
+
+
+
+input[type=date]{
+    position: relative;
+    height: 25px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 2px 3px 2px 3px;
+}
+
+
+input[type="date"]::-webkit-clear-button {
+  -webkit-appearance: none;
+  display: none;
+}
+
+input[type=number]{
+    width: 50px;
+}

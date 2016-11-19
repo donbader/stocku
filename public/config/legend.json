@@ -1,0 +1,9 @@
+{
+  "legend": {
+    "divId": "legenddiv",
+    "horizontalGap": 10,
+    "labelText": "[[title]]",
+    "maxColumns": 1,
+    "useGraphSettings": true
+  }
+}

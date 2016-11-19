@@ -1,0 +1,83 @@
+{
+  "type": "serial",
+  "theme": "Black",
+  "marginRight": 80,
+  "valueAxes": [
+    {
+      "position": "left",
+      "title": "Stock prices"
+    }
+  ],
+  "graphs": [
+    {
+      "id": "priceGraph",
+      "type": "smoothedLine",
+      "fillAlphas": 0,
+      "lineThickness": 2,
+      "bullet": "round",
+      "bulletBorderAlpha": 1,
+      "bulletColor": "#FFFFFF",
+      "bulletSize": 5,
+      "useLineColorForBulletBorder": true,
+      "balloon": {
+        "borderThickness": 0.2,
+        "shadowAlpha": 0,
+        "fillColor": "#000000",
+        "color": "#ffffff"
+      },
+      "title": "價錢線",
+      "titleField": "time",
+      "valueField": "price"
+
+    },
+    {
+      "id": "forecastGraph",
+      "type": "smoothedLine",
+      "lineThickness": 2,
+      "fillAlphas": 0,
+      "bullet": "round",
+      "bulletBorderAlpha": 1,
+      "bulletColor": "#FFFFFF",
+      "bulletSize": 5,
+      "useLineColorForBulletBorder": true,
+      "balloon":{
+        "enabled":false
+      },
+      "title": "預測線",
+      "titleField": "time",
+      "valueField": "forecast"
+    }
+  ],
+  "chartScrollbar": {
+    "graph": "priceGraph",
+    "oppositeAxis": false,
+    "scrollbarHeight": 60,
+    "backgroundAlpha": 0,
+    "selectedBackgroundAlpha": 0.1,
+    "selectedBackgroundColor": "#888888",
+    "graphFillAlpha": 0,
+    "graphLineAlpha": 0.5,
+    "selectedGraphFillAlpha": 0,
+    "selectedGraphLineAlpha": 1,
+    "autoGridCount": true,
+    "color": "#AAAAAA"
+  },
+  "chartCursor": {
+    "categoryBalloonDateFormat": "JJ:NN",
+    "cursorPosition": "mouse",
+    "cursorAlpha": 0.2,
+    "limitToGraph": "priceGraph",
+    "valueLineEnabled": true,
+    "valueLineBalloonEnabled": true,
+    "valueLineAlpha": 0.3
+  },
+  "categoryField": "time",
+  "categoryAxis": {
+    "minPeriod": "mm",
+    "parseDates": true
+  },
+  "export": {
+    "enabled": true,
+    "dateFormat": "YYYY-MM-DD HH:NN:SS"
+  }
+}
