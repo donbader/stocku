@@ -79,8 +79,6 @@ router.get('/forecast', function(req, res) {
 });
 
 
-
-
 function parseCSV(data, delimiter){
 	data = data.split('\n');
 	delimiter = delimiter || ',';

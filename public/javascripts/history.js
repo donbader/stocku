@@ -8,6 +8,7 @@
  *              FIRST INITIALZATION               *
  **************************************************/
 var chart = new STOCKU.ChartInMinuteScale("chartdiv");
+// var chart2 = new STOCKU.ChartWithCandleSticks("chart2div");
 var searcherblock = new STOCKU.SearcherWithDate("searcherdiv");
 
 /**************************************************

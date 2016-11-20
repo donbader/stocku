@@ -296,6 +296,21 @@
 			this.validateData = ()=>chart.validateData();
 
 		},
+		ChartWithCandleSticks: function(id){
+			// generate random id
+			var randNum = new Date().getTime() % 1000;
+			var chartID = 'chart' + randNum;
+
+			$('#' + id).append('<div id="' + chartID + '"></div>');
+			$('#' + chartID).attr('style', "width: 100%; height:400px;");
+
+			//---------------------------------------------------------------
+			// Chart Template
+			var config = STOCKU.LoadSettings("config/chart.template.json");
+			var chart = this.instance = new AmCharts.makeChart(chartID, config);
+
+			//---------------------------------------------------------------
+		},
 		Searcher: function(divId){
 			var scope = this;
 			this.$ = {};
