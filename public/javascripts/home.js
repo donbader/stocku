@@ -106,7 +106,7 @@ function genNewData (){
     var nextData = {time: nextTime, forecast: nextForecast};
     arr.push(nextData);
 
-    STOCKU.addAccuracy(arr);
+    STOCKU.calcRMS(arr);
     chart.validateData();
 }
 /**************************************************
@@ -155,7 +155,7 @@ searcherblock.search = function (){
         .then(
             ()=>{
                 // 準確率計算
-                STOCKU.addAccuracy(chart.arrayData())
+                STOCKU.calcRMS(chart.arrayData())
                 chart.validateData();
                 tracker.track();
             }
@@ -166,7 +166,7 @@ searcherblock.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(2498);
+searcherblock.$.input.val(1101);
 tracker.$.input.val(20);
 searcherblock.$.button.mouseup();
 

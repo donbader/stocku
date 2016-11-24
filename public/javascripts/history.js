@@ -89,9 +89,16 @@ function genNewData (){
     var nextData = {time: nextTime, forecast: nextForecast};
     arr.push(nextData);
 
-    STOCKU.addAccuracy(arr);
+    STOCKU.calcRMS(arr);
     chart.validateData();
 }
+
+// function toOHLC(priceData){
+//     var open, hight, low, close;
+//     for(var i in arr){
+//         priceData[i]
+//     }
+// }
 /**************************************************
  *              DEBUG FUNCTION                    *
  **************************************************/
@@ -138,7 +145,7 @@ searcherblock.searcher.search = function (){
         .then(
             ()=>{
                 // 準確率計算
-                STOCKU.addAccuracy(chart.arrayData())
+                STOCKU.calcRMS(chart.arrayData())
                 chart.validateData();
             }
         );
@@ -148,12 +155,13 @@ searcherblock.searcher.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(2498);
+searcherblock.$.input.val(1101);
+searcherblock.$.date.val("2016-11-23");
 searcherblock.$.button.mouseup();
 
-//--------------------------------------------------
+// //--------------------------------------------------
 
-// Random Data
+// // Random Data
 // var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
 // var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
 // priceData = STOCKU.ObjectCombine(priceData, forecastData);
@@ -163,6 +171,9 @@ searcherblock.$.button.mouseup();
 // chart.addJsonData(priceData);
 // chart.addJsonData(accuracyData);
 // $("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
+
+// STOCKU.calcRMS(chart.arrayData());
+// chart.validateData();
 
 //--------------------------------------------------
 

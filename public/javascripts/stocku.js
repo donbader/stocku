@@ -162,6 +162,32 @@
 					STOCKU.ObjectCombine(arr[i], STOCKU.calcAccuracy(arr[i-1], arr[i]));
 			}
 		},
+		calcRMS: function(data){
+			console.log(data.length);
+			var size = 0;
+			var square = 0;
+			data[0].acc_size = size;
+			data[0].acc_square = square;
+			for(var i = 1 ;i < data.length ; ++i){
+				if(data[i].price === undefined
+					|| data[i].forecast === undefined){
+					data[i].acc_size = size;
+					data[i].acc_square = square;
+					continue;
+				}
+				data[i].acc_square = data[i-1].acc_square;
+				data[i].acc_size = data[i-1].acc_size;
+				// console.log(i);
+				// console.log(data[i-1].acc_square);
+				data[i].acc_square += Math.pow(data[i].price - data[i].forecast, 2);
+				data[i].acc_size += 1;
+				data[i].rmse = Math.sqrt(data[i].acc_square / data[i].acc_size);
+
+				square = data[i].acc_square;
+				size = data[i].acc_size;
+			}
+			console.log(data);
+		},
 		ObjectCombine: function(a, b) {
 			for (var attr in b) {
 				if (typeof b[attr] === 'object') {
@@ -242,27 +268,28 @@
 			// Load file
 			var smoothedLine_price = STOCKU.LoadSettings("config/graph.smoothedline.json", "price");
 			var smoothedLine_forecast = STOCKU.LoadSettings("config/graph.smoothedline.json", "forecast");
-			var smoothedLine_accuracy = STOCKU.LoadSettings("config/graph.line.json", "accuracy");
+			var smoothedLine_rmse = STOCKU.LoadSettings("config/graph.line.json", "rmse");
 			var price_axis = STOCKU.LoadSettings("config/valueAxis.json", "v1");
-			var accuracy_axis = STOCKU.LoadSettings("config/valueAxis.json", "v2");
+			var rmse_axis = STOCKU.LoadSettings("config/valueAxis.json", "v2");
 			var legend = STOCKU.LoadSettings("config/legend.json", "legenddiv");
 
 			// Modify Config
 			smoothedLine_forecast.graphs[0].balloon.enabled = false;
-			accuracy_axis.valueAxes[0].position = "left";
-			accuracy_axis.valueAxes[0].labelFunction = function(data){return (data * 100).toFixed(2) + "%";};
+			rmse_axis.valueAxes[0].position = "left";
+			legend.valueFunction = function(){return "HIHI";}
+			// rmse_axis.valueAxes[0].labelFunction = function(data){return (data * 100).toFixed(2) + "%";};
 
 			// Axis Bind To Graph
 			STOCKU.BindGraphAndAxis(smoothedLine_price, price_axis);
 			STOCKU.BindGraphAndAxis(smoothedLine_forecast, price_axis);
-			STOCKU.BindGraphAndAxis(smoothedLine_accuracy, accuracy_axis);
+			STOCKU.BindGraphAndAxis(smoothedLine_rmse, rmse_axis);
 
 			// Bind to Chart
 			STOCKU.ObjectCombine(chart, smoothedLine_price);
 			STOCKU.ObjectCombine(chart, smoothedLine_forecast);
-			STOCKU.ObjectCombine(chart, smoothedLine_accuracy);
+			STOCKU.ObjectCombine(chart, smoothedLine_rmse);
 			STOCKU.ObjectCombine(chart, price_axis);
-			STOCKU.ObjectCombine(chart, accuracy_axis);
+			STOCKU.ObjectCombine(chart, rmse_axis);
 			STOCKU.ObjectCombine(chart, legend);
 			//---------------------------------------------------------------
 
@@ -309,7 +336,60 @@
 			var config = STOCKU.LoadSettings("config/chart.template.json");
 			var chart = this.instance = new AmCharts.makeChart(chartID, config);
 
+			var smoothedLine_price = STOCKU.LoadSettings("config/graph.smoothedline.json", "price");
+			var smoothedLine_forecast = STOCKU.LoadSettings("config/graph.smoothedline.json", "forecast");
+			var smoothedLine_accuracy = STOCKU.LoadSettings("config/graph.line.json", "accuracy");
+			var price_axis = STOCKU.LoadSettings("config/valueAxis.json", "v1");
+			var accuracy_axis = STOCKU.LoadSettings("config/valueAxis.json", "v2");
+			var legend = STOCKU.LoadSettings("config/legend.json", "legenddiv");
+
+			// Modify Config
+			smoothedLine_forecast.graphs[0].balloon.enabled = false;
+			accuracy_axis.valueAxes[0].position = "left";
+			accuracy_axis.valueAxes[0].labelFunction = function(data){return (data * 100).toFixed(2) + "%";};
+
+			// Axis Bind To Graph
+			STOCKU.BindGraphAndAxis(smoothedLine_price, price_axis);
+			STOCKU.BindGraphAndAxis(smoothedLine_forecast, price_axis);
+			STOCKU.BindGraphAndAxis(smoothedLine_accuracy, accuracy_axis);
+
+			// Bind to Chart
+			STOCKU.ObjectCombine(chart, smoothedLine_price);
+			STOCKU.ObjectCombine(chart, smoothedLine_forecast);
+			STOCKU.ObjectCombine(chart, smoothedLine_accuracy);
+			STOCKU.ObjectCombine(chart, price_axis);
+			STOCKU.ObjectCombine(chart, accuracy_axis);
+			STOCKU.ObjectCombine(chart, legend);
+
 			//---------------------------------------------------------------
+			// Json data
+			this.jsonData = {};
+			this.addJsonData = function(data) {
+				// record old dates
+				this.prevStartTime = chart.startDate;
+				this.prevEndTime = chart.endDate;
+
+				STOCKU.mergeJson(this.jsonData, data);
+				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
+			};
+			this.arrayData =  function (arr){
+				if(arr === undefined)
+					return chart.dataProvider;
+				else{
+					// record old dates
+					this.prevStartTime = chart.startDate;
+					this.prevEndTime = chart.endDate;
+
+					chart.dataProvider = arr;
+					chart.validateData();
+					return chart.dataProvider;
+				}
+			};
+			this.zoomToDates = function (start, end){
+				return chart.zoomToDates(start, end);
+			}
+			this.validateData = ()=>chart.validateData();
+
 		},
 		Searcher: function(divId){
 			var scope = this;
