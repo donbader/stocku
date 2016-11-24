@@ -163,7 +163,6 @@
 			}
 		},
 		calcRMS: function(data){
-			console.log(data.length);
 			var size = 0;
 			var square = 0;
 			data[0].acc_size = size;
@@ -186,7 +185,6 @@
 				square = data[i].acc_square;
 				size = data[i].acc_size;
 			}
-			console.log(data);
 		},
 		ObjectCombine: function(a, b) {
 			for (var attr in b) {
@@ -303,6 +301,7 @@
 
 				STOCKU.mergeJson(this.jsonData, data);
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
+				chart.dataProvider.sort((a,b)=>new Date(a.time) < new Date(b.time) ? -1 : 1);
 			};
 			this.arrayData =  function (arr){
 				if(arr === undefined)
@@ -371,6 +370,7 @@
 
 				STOCKU.mergeJson(this.jsonData, data);
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
+				chart.dataProvider.sort((a,b)=>new Date(a.time) < new Date(b.time) ? -1 : 1);
 			};
 			this.arrayData =  function (arr){
 				if(arr === undefined)
@@ -388,7 +388,9 @@
 			this.zoomToDates = function (start, end){
 				return chart.zoomToDates(start, end);
 			}
-			this.validateData = ()=>chart.validateData();
+			this.validateData = ()=>{
+				chart.validateData()
+			};
 
 		},
 		Searcher: function(divId){

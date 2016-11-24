@@ -155,7 +155,7 @@ searcherblock.searcher.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(1101);
+searcherblock.$.input.val(1232);
 searcherblock.$.date.val("2016-11-23");
 searcherblock.$.button.mouseup();
 
