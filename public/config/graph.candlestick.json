@@ -1,16 +1,18 @@
 {
-	"balloonText": "Open:<b>[[open]]</b><br>Low:<b>[[low]]</b><br>High:<b>[[high]]</b><br>Close:<b>[[close]]</b><br>",
-	"closeField": "close",
-	"fillAlphas": 0.9,
-	"fillColors": "#7f8da9",
-	"highField": "high",
-	"id": "g1",
-	"lineColor": "#7f8da9",
-	"lowField": "low",
-	"negativeFillColors": "#db4c3c",
-	"negativeLineColor": "#db4c3c",
-	"openField": "open",
-	"title": "Price:",
-	"type": "candlestick",
-	"valueField": "close"
+	"graphs": [{
+		"type": "candlestick",
+		"title": "Close",
+		"id": "Candlestick_",
+		"balloonText": "Open:<b>[[open]]</b><br>Low:<b>[[low]]</b><br>High:<b>[[high]]</b><br>Close:<b>[[close]]</b><br>",
+		"closeField": "close",
+		"fillAlphas": 0.9,
+		"fillColors": "#db4c3c",
+		"openField": "open",
+		"highField": "high",
+		"lowField": "low",
+		"valueField": "close",
+		"lineColor": "#db4c3c",
+		"negativeFillColors": "#008000",
+		"negativeLineColor": "#008000"
+	}]
 }

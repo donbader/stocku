@@ -1,0 +1,56 @@
+{
+    "dataSets": [{
+        "title": "OHLC",
+        "categoryField": "time",
+        "fieldMappings": [{
+            "fromField": "open",
+            "toField": "open"
+        }, {
+            "fromField": "close",
+            "toField": "close"
+        }, {
+            "fromField": "high",
+            "toField": "high"
+        }, {
+            "fromField": "low",
+            "toField": "low"
+        }],
+        "color": "#7f8da9",
+        "dataProvider": []
+    }],
+    "panels": [{
+        "title": "Value",
+        "hideCredits": true,
+        "showCategoryAxis": false,
+        "percentHeight": 70,
+        "valueAxes": [{
+            "dashLength": 5
+        }],
+
+        "categoryAxis": {
+            "dashLength": 5
+        },
+
+        "stockGraphs": [{
+            "type": "candlestick",
+            "openField": "open",
+            "closeField": "close",
+            "highField": "high",
+            "lowField": "low",
+            "valueField": "close",
+            "lineColor": "#7f8da9",
+            "fillColors": "#7f8da9",
+            "negativeLineColor": "#db4c3c",
+            "negativeFillColors": "#db4c3c",
+            "fillAlphas": 1,
+            "useDataSetColors": false,
+            "showBalloon": false,
+            "proCandlesticks": true
+        }],
+
+        "stockLegend": {
+            "valueTextRegular": "",
+            "periodValueTextComparing": "[[percents.value.close]]%"
+        }
+    }]
+}

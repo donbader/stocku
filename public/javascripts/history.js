@@ -7,15 +7,16 @@
 /**************************************************
  *              FIRST INITIALZATION               *
  **************************************************/
-var chart = new STOCKU.ChartInMinuteScale("chartdiv");
-// var chart2 = new STOCKU.ChartWithCandleSticks("chart2div");
+var lineChart = new STOCKU.Chart("lineChartDiv", "line");
+var candlestickChart = new STOCKU.Chart("candlestickChartDiv","candlestick");
 var searcherblock = new STOCKU.SearcherWithDate("searcherdiv");
+
 
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
 function getPrice(stock, date) {
-    var lastTimeUpdate = STOCKU.lastTimeAppear(chart.arrayData(), "price");
+    var lastTimeUpdate = STOCKU.lastTimeAppear(lineChart.arrayData(), "price");
 
     log("Getting Price...");
     return new Promise((resolve, reject) => {
@@ -46,7 +47,7 @@ function getPrice(stock, date) {
 
 
 function getForecast(stock, date) {
-    var lastTimeUpdate = STOCKU.lastTimeAppear(chart.arrayData(), "forecast");
+    var lastTimeUpdate = STOCKU.lastTimeAppear(lineChart.arrayData(), "forecast");
 
     log("Getting Forecast...");
     return new Promise((resolve, reject) => {
@@ -77,7 +78,7 @@ function getForecast(stock, date) {
 
 
 function genNewData (){
-    var arr = chart.arrayData();
+    var arr = lineChart.arrayData();
     var currTime = new Date(arr[arr.length - 1].time);
     var nextTime = new Date(currTime);
     nextTime.setMinutes(currTime.getMinutes() + 1);
@@ -89,16 +90,11 @@ function genNewData (){
     var nextData = {time: nextTime, forecast: nextForecast};
     arr.push(nextData);
 
-    STOCKU.calcRMS(arr);
-    chart.validateData();
+    STOCKU.addRMSE(arr);
+    lineChart.validateData();
 }
 
-// function toOHLC(priceData){
-//     var open, hight, low, close;
-//     for(var i in arr){
-//         priceData[i]
-//     }
-// }
+
 /**************************************************
  *              DEBUG FUNCTION                    *
  **************************************************/
@@ -127,26 +123,27 @@ $("#logmsg").on("add", function(event, msg, color) {
 // Override search();
 searcherblock.searcher.search = function (){
     // clear data
-    chart.jsonData = {};
+    lineChart.jsonData = {};
     var stock = searcherblock.$.input.val();
     var date = searcherblock.$.date.val();
     getPrice(stock, date)
         .then(
             (data) => {
-                chart.addJsonData(data);
+                lineChart.addJsonData(data);
+                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5,"min"));
                 return getForecast(stock, date);
             },
             (response) =>getForecast(stock, date)
         )
         .then(
-            (data) => chart.addJsonData(data),
+            (data) => lineChart.addJsonData(data),
             (response)=> 0
         )
         .then(
             ()=>{
                 // 準確率計算
-                STOCKU.calcRMS(chart.arrayData())
-                chart.validateData();
+                STOCKU.addRMSE(lineChart.arrayData())
+                lineChart.validateData();
             }
         );
 }
@@ -158,24 +155,16 @@ searcherblock.searcher.search = function (){
 searcherblock.$.input.val(1232);
 searcherblock.$.date.val("2016-11-23");
 searcherblock.$.button.mouseup();
+lineChart.validateData();
 
 // //--------------------------------------------------
 
 // // Random Data
-// var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
-// var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
-// priceData = STOCKU.ObjectCombine(priceData, forecastData);
-
-// var accuracyData = STOCKU.calcAccuracy(priceData, 1);
-// chart.addJsonData(forecastData);
-// chart.addJsonData(priceData);
-// chart.addJsonData(accuracyData);
 // $("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
-
-// STOCKU.calcRMS(chart.arrayData());
-// chart.validateData();
-
-//--------------------------------------------------
-
-
-
+//
+// var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 13:00:00", "price", 1, "min");
+// var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 13:01:00", "forecast", 1, "min", 4, priceData, "price");
+// priceData = STOCKU.ObjectCombine(priceData, forecastData);
+// lineChart.addJsonData(priceData);
+// STOCKU.addRMSE(lineChart.arrayData());
+// candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));

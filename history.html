@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +9,7 @@
 
     <title>Stocku</title>
 
-   <!-- Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/elegant-font/code/style.css">
@@ -25,14 +26,19 @@
     <script src="assets/amcharts/plugins/export/export.min.js"></script>
     <script src="assets/amcharts/themes/light.js"></script>
     <script src="assets/jquery-3.1.1.min.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
     <!-- <script src="https://code.jquery.com/jquery-1.12.3.js"></script> -->
-<!--     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <!--     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.7/d3.min.js" integrity="sha256-UE//NUN7Ta3VYcPjMbH1uM/uiCju935oA+LsIf55TwU=" crossorigin="anonymous"></script>
- --></head>
+ -->
+</head>
+
 <body>
 
-<!-- the section for navigation -->
+    <!-- the section for navigation -->
     <nav class="navbar" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -54,30 +60,42 @@
         </div>
     </nav>
 
-<!-- the section for amchart -->
+    <!-- the section for amchart -->
     <div class="block-3-container section-container what-we-do-container">
         <div class="container">
             <div class="row">
                 <h2>&nbsp</h2>
             </div>
             <div class="row">
-                <div class="col-sm-9">
-                    <div id="chart2div"></div>
-                    <div id="chartdiv"></div>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#111">折線圖</a></li>
+                    <li><a data-toggle="tab" href="#222">蠟燭圖</a></li>
+                </ul>
+                <div class="tab-content col-sm-9">
+                    <div class="tab-pane fade in active" id="111">
+                            <div id="lineChartDiv"></div>
+                    </div>
+                    <div class="tab-pane fade" id="222">
+                        <div id="candlestickChartDiv"></div>
+                    </div>
+
                 </div>
                 <div class="col-sm-3">
                     <div class="row orm-group text-left">
+                        <div id="legenddiv"></div>
                         請輸入股票代碼 & 查詢日期：
                         <div id="searcherdiv"></div>
-                        <div id="legenddiv"></div>
+                        <div id="modediv"></div>
                         狀態：
                         <div id="logmsg"></div>
                     </div>
 
                 </div>
             </div>
-        </div> <!-- end of tag of <div class="container"> -->
-    </div> <!-- end of tag of <div class="block-3-container section-container what-we-do-container"> -->
+        </div>
+        <!-- end of tag of <div class="container"> -->
+    </div>
+    <!-- end of tag of <div class="block-3-container section-container what-we-do-container"> -->
 
     <!-- Here is the code for history -->
     <script type="text/javascript" src="javascripts/stocku.js"></script>
@@ -127,4 +145,5 @@
     </footer>
 
 </body>
+
 </html>

@@ -1,0 +1,65 @@
+{
+    "dataSets":[{
+        "title": "Price",
+        "categoryField": "time",
+        "fieldMappings": [{
+            "fromField": "price",
+            "toField": "price"
+        }, {
+            "fromField": "forecast",
+            "toField": "forecast"
+        },{
+            "fromField": "rmse",
+            "toField": "rmse"
+        }],
+        "dataProvider": []
+    }],
+    "panels":[{
+        "title": "Panel 1",
+        "hideCredits": true,
+        "valueAxes": [{
+            "id":"v3",
+            "position":"left"
+        },{
+            "id":"v4",
+            "position":"right"
+        }],
+        "stockGraphs": [{
+            "id": "price-line",
+            "useDataSetColors": false,
+            "valueField": "price",
+            "valueAxis": "v3",
+            "lineThickness": 3,
+            "comparable": true,
+            "bullet": "round",
+            "bulletSize": 1,
+            "balloonText": "price: [[value]]"
+        }, {
+            "id": "forecast-line",
+            "useDataSetColors": false,
+            "valueField": "forecast",
+            "valueAxis": "v3",
+            "lineThickness": 3,
+            "comparable": true,
+            "bullet": "round",
+            "bulletSize": 1,
+            "balloonText": "forecast: [[value]]"
+        },
+        {
+            "id": "rmse-line",
+            "useDataSetColors": false,
+            "valueField": "rmse",
+            "valueAxis": "v4",
+            "lineThickness": 3,
+            "comparable": true,
+            "bullet": "round",
+            "bulletSize": 1,
+            "balloonText": "rmse: [[value]]"
+        }],
+        "stockLegend": {
+            "divId": "legenddiv",
+            "labelText": "[[title]]",
+            "valueTextRegular": " "
+        }
+    }]
+}
