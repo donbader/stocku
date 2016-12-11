@@ -328,6 +328,7 @@
 			// Chart Template
 			var config = STOCKU.LoadSettings("config/chart.template.json");
 			var chart = this.instance = new AmCharts.makeChart(chartID, config);
+
 			//---------------------------------------------------------------
 			// Component
 			// Load file
@@ -340,19 +341,18 @@
 				// record old dates
 				this.prevStartTime = chart.startDate;
 				this.prevEndTime = chart.endDate;
-
 				STOCKU.mergeJson(this.jsonData, data);
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
 				chart.dataProvider.sort((a, b) => new Date(a.time) < new Date(b.time) ? -1 : 1);
 			};
 			this.arrayData = function(arr) {
+				// record old dates
+				this.prevStartTime = chart.startDate;
+				this.prevEndTime = chart.endDate;
+
 				if (arr === undefined)
 					return chart.dataProvider;
 				else {
-					// record old dates
-					this.prevStartTime = chart.startDate;
-					this.prevEndTime = chart.endDate;
-
 					chart.dataProvider = arr;
 					chart.validateData();
 					return chart.dataProvider;
@@ -412,6 +412,7 @@
 		Searcher: function(divId) {
 			var scope = this;
 			this.$ = {};
+			this.state = {price: {}, forecast:{}};
 			var input = this.$.input = $('<input class="stocku" type="search" placeholder="股票代碼">');
 			var button = this.$.button = $('<input class="stocku" type="button">');
 			$('#' + divId).append(input);
@@ -441,6 +442,8 @@
 		SearcherWithDate: function(divId) {
 			var scope = this;
 			this.$ = {};
+			this.state = {price: {}, forecast:{}};
+			
 			var searcher = this.searcher = new STOCKU.Searcher(divId);
 			this.$.input = searcher.$.input;
 			this.$.button = searcher.$.button;
