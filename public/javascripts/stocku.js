@@ -309,9 +309,19 @@
 				}
 			}
 		},
-		TrendLine(arr){
+		TrendLine: function(arr){
+			var x = [],y = [];
 			// TODO: Regression line implement
-			return {a:a,b:b};
+			for(var i = 0;i<arr.length - 1;i++){
+				arr[i]['reg'] = null;
+				x[i] = i;
+				y[i] = arr[i]['price'];
+			}
+			var formular = LeastSquares(x,y);
+			//console.log(formular);
+			arr[0]['reg'] = formular['bias'];
+			arr[arr.length - 1]['reg'] = (arr.length - 1) * formular['slope'] + formular['bias'];
+			return formular['slope'];
 		},
 		/**************************************************
 		 *              CHART                             *
@@ -383,6 +393,7 @@
 					var price_line = STOCKU.LoadSettings("config/graph.line.json", "price");
 					var forecast_line = STOCKU.LoadSettings("config/graph.line.json", "forecast");
 					var rmse_line = STOCKU.LoadSettings("config/graph.line.json", "rmse");
+					var reg_line = STOCKU.LoadSettings("config/graph.line.json", "reg");
 					var price_axis = STOCKU.LoadSettings("config/valueAxis.json", "price");
 					var rmse_axis = STOCKU.LoadSettings("config/valueAxis.json", "rmse");
 					var legend = STOCKU.LoadSettings("config/legend.json", "legenddiv");
@@ -396,6 +407,7 @@
 					this.add(price_line, price_axis);
 					this.add(forecast_line, price_axis);
 					this.add(rmse_line, rmse_axis);
+					this.add(reg_line);
 					this.add(legend);
 					break;
 				case "candlestick":
@@ -493,3 +505,54 @@
 
 	return STOCKU;
 }));
+
+/**************************************************
+ *              Least Square                      *
+ **************************************************/
+function LeastSquares(values_x, values_y) {
+    var sum_x = 0;
+    var sum_y = 0;
+    var sum_xy = 0;
+    var sum_xx = 0;
+    var count = 0;
+
+    /*
+     * We'll use those variables for faster read/write access.
+     */
+    var x = 0;
+    var y = 0;
+    var values_length = values_x.length;
+
+    if (values_length != values_y.length) {
+        throw new Error('The parameters values_x and values_y need to have same size!');
+    }
+
+    /*
+     * Nothing to do.
+     */
+    if (values_length === 0) {
+        return [ [], [] ];
+    }
+
+    /*
+     * Calculate the sum for each of the parts necessary.
+     */
+    for (var v = 0; v < values_length; v++) {
+        x = values_x[v];
+        y = values_y[v];
+        sum_x += x;
+        sum_y += y;
+        sum_xx += x*x;
+        sum_xy += x*y;
+        count++;
+    }
+
+    /*
+     * Calculate m and b for the formular:
+     * y = x * m + b
+     */
+    var m = (count*sum_xy - sum_x*sum_y) / (count*sum_xx - sum_x*sum_x);
+    var b = (sum_y/count) - (m*sum_x)/count;
+
+    return { slope : m , bias : b };
+}

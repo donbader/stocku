@@ -126,15 +126,12 @@
 			return json;
 		},
 		SerialChart: function(id){
-			//init
+			// generate random id
 			var randNum = new Date().getTime()%1000;
 			var chartID = 'chart' + randNum;
 
 			$('#' + id).append('<div id="'+chartID+'"></div>');
 			$('#'+chartID).attr('style',"width: 100%; height:400px;");
-
-
-			// generate random
 
 
 		    var chart = new AmCharts.AmSerialChart();
@@ -148,12 +145,37 @@
 		    chart.categoryAxis.minPeriod = "mm";
 		    chart.categoryAxis.parseDates = true;
 
-		    // add component
-		    chart.addValueAxis(new CHART.ValueAxis("v1", "Price", "left"));
-		    chart.addValueAxis(new CHART.ValueAxis("v2", "準確率", "right"));
-    		chart.valueAxes[1].labelFunction = function(data){return (data * 100).toFixed(2) + "%";};
 
-		    chart.addGraph(new CHART.Graph({
+		    this.add = function(config){
+		    	for(var component in config){
+		    		switch(component){
+		    			case "legend":
+			    			var divId = config[component].divId;
+					    	if(divId){
+								$('#' + divId).attr('style',
+											 "height: 100px !important;"
+											+"overflow: auto;"
+											+"position: relative;"
+											+"margin: 5px 0 20px 0;");
+						    	chart.addLegend(config[component], divId);
+							}
+		    			break;
+		    			case "valueAxis":
+		    				chart["valueAxes"].push(config[component]);
+		    			break;
+		    			case "graph":
+		    				chart["graphs"].push(config[component]);
+	    				break;
+		    			default:
+		    			chart[component] = config[component];
+		    		}
+		    	}
+		    }
+
+		    this.add(CHART.ValueAxis("v1", "Price", "left"));
+		    this.add(CHART.ValueAxis("v2", "準確率", "right"));
+    		chart.valueAxes[1].labelFunction = function(data){return (data * 100).toFixed(2) + "%";};
+		    this.add(CHART.Graph({
 		    	id:"g1",
 		    	title: "價錢線",
 		    	valueField: "price",
@@ -161,7 +183,7 @@
 		    	enableBalloon: true,
 		    	color: "#f99f9f"
 		    }));
-		    chart.addGraph(new CHART.Graph({
+		    this.add(CHART.Graph({
 		    	id:"g2",
 		    	title: "預測線",
 		    	valueField: "forecast",
@@ -169,7 +191,7 @@
 		    	enableBalloon: false,
 		    	color: "#fccc2d"
 		    }));
-		    chart.addGraph(new CHART.Graph({
+		    this.add(CHART.Graph({
 		    	id:"g3",
 		    	title: "準確率",
 		    	valueField: "accuracy",
@@ -177,10 +199,11 @@
 		    	enableBalloon: true,
 		    	color: "#2dbefc"
 		    }));
+		    this.add(CHART.ChartCursor());
+		    this.add(CHART.ChartScrollbar("g1"));
+		    this.add(CHART.PeriodSelector());
+		    console.log(this.instance);
 
-		    chart.addChartScrollbar(CHART.ChartScrollbar("g1"));
-		    chart.addChartCursor(CHART.ChartCursor());
-		    chart.periodSelector = CHART.PeriodSelector();
 
 		    chart.write(chartID);
 
@@ -192,20 +215,7 @@
 		    	oldDate = {startDate: chart.startDate, endDate: chart.endDate};
 		    	chart.dataProvider = CHART.JsonToArray(this.json);
 		    	chart.validateData();
-		    }
-		    this.addGraph = (g)=>chart.addGraph(g);
-		    this.addValueAxis = (v)=>chart.addValueAxis(v);
-		    this.addLegend = (l,divId)=>{
-		    	if(divId){
-					$('#' + divId).attr('style',
-								 "height: 100px !important;"
-								+"overflow: auto;"
-								+"position: relative;"
-								+"margin: 5px 0 20px 0;");
-				}
-		    	chart.addLegend(l,divId);
 		    };
-
 
 		    this.setJSON = function(JSONData){
 		    	this.json = JSONData;
@@ -223,102 +233,207 @@
 		    var oldDate;
 		    this.zoomByOldDates = ()=>chart.zoomToDates(oldDate.startDate, oldDate.endDate);
 
+
 		},
-		Graph: function(config){
-			config = config || {};
-			config.color = config.color || "#" + (Math.random()*10).toFixed(0)
-								+ (Math.random()*10000).toFixed(0)
-								+ (Math.random()*10).toFixed(0);
-		    var graph = new AmCharts.AmGraph();
-		    graph.id = config.id;
-		    graph.title = config.title;
-		    graph.valueField = config.valueField;
-		    graph.type = "smoothedLine";
-		    graph.fillAlphas = 0;
-		    graph.valueAxis = config.valueAxis;
-		    graph.lineColor = config.color;
-			graph.lineThickness = 2;
+		StockChart: function(id){
+			// generate random id
+			var randNum = new Date().getTime()%1000;
+			var chartID = 'chart' + randNum;
 
-		    // bullet
-			graph.bullet = "round";
-			graph.bulletBorderAlpha = 1;
-			graph.bulletSize = 2;
-			graph.useLineColorForBulletColor = true;
-			graph.useLineColorForBulletBorder = true;
+			$('#' + id).append('<div id="'+chartID+'"></div>');
+			$('#'+chartID).attr('style',"width: 100%; height:400px;");
 
-			// balloon
-			var balloon = new AmCharts.AmBalloon();
-			graph.balloon = balloon;
-			if(config.enableBalloon){
-				graph.balloon.useGraphSettings = true;
-		        graph.balloon.borderThickness = 0.2;
-		        graph.balloon.shadowAlpha = 0;
-		        graph.balloon.fillColor = config.color;
-		        graph.balloon.color = "#ffffff";
+
+		    var chart = new AmCharts.AmStockChart();
+		    this.instance = chart;
+		    // init
+            var chartData= [
+                {time: new Date(2011, 5, 1, 0, 0, 0, 0), open:10, high:20, low: 5, close: 13},
+                {time: new Date(2011, 5, 2, 0, 0, 0, 0), open:13, high:14, low: 10, close: 10},
+                {time: new Date(2011, 5, 3, 0, 0, 0, 0), open:10, high:16, low: 9, close: 15},
+                {time: new Date(2011, 5, 4, 0, 0, 0, 0), open:15, high:20, low: 14, close: 20},
+                {time: new Date(2011, 5, 5, 0, 0, 0, 0), open:20, high:26, low: 10, close: 25},
+                {time: new Date(2011, 5, 6, 0, 0, 0, 0), open:25, high:30, low: 19, close: 20},
+            ];
+
+                var dataSet = new AmCharts.DataSet();
+                dataSet.dataProvider = chartData;
+                dataSet.fieldMappings = [
+                	{fromField:"open", toField:"open"},
+                	{fromField:"high", toField:"high"},
+                	{fromField:"low", toField:"low"},
+                	{fromField:"close", toField:"close"}
+                ];
+                dataSet.categoryField = "time";
+                chart.dataSets = [dataSet];
+
+                var stockPanel = new AmCharts.StockPanel();
+				stockPanel.hideCredits = true;
+                chart.panels = [stockPanel];
+
+                var legend = new AmCharts.StockLegend();
+                stockPanel.stockLegend = legend;
+
+                var panelsSettings = new AmCharts.PanelsSettings();
+                panelsSettings.startDuration = 0;
+                chart.panelsSettings = panelsSettings;
+
+                var graph = new AmCharts.StockGraph();
+                graph.valueField = "value";
+                graph.type = "candlestick";
+                graph.title = "MyGraph";
+		        graph.lineColor = "#00ff00";
+                graph.fillAlphas = 0.4;
+		        graph.fillColors = "#00ff00";
+		        graph.openField = "open";
+		        graph.closeField = "close";
+		        graph.highField = "high";
+		        graph.lowField = "low";
+		        graph.negativeLineColor = "black";
+		        graph.positiveLineColor = "black";
+		        graph.negativeFillColors = "#db4c3c";
+		        graph.comparedGraphLineThickness = 2;
+		        graph.comparable = true;
+		        graph.compareField = "close";
+		        graph.proCandlesticks = true;
+
+                stockPanel.addStockGraph(graph);
+
+                var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
+                categoryAxesSettings.dashLength = 5;
+                chart.categoryAxesSettings = categoryAxesSettings;
+
+                var valueAxesSettings = new AmCharts.ValueAxesSettings();
+                valueAxesSettings .dashLength = 5;
+                chart.valueAxesSettings  = valueAxesSettings;
+
+                var chartScrollbarSettings = new AmCharts.ChartScrollbarSettings();
+                chartScrollbarSettings.graph = graph;
+                chartScrollbarSettings.graphType = "line";
+                chart.chartScrollbarSettings = chartScrollbarSettings;
+
+                var chartCursorSettings = new AmCharts.ChartCursorSettings();
+                chartCursorSettings.valueBalloonsEnabled = true;
+                chart.chartCursorSettings = chartCursorSettings;
+
+                var periodSelector = new AmCharts.PeriodSelector();
+                periodSelector.position = "top";
+                periodSelector.periods = [{period:"DD", count:1, label:"D"},
+                                          {period:"MM", count:1, label:"M"},
+                                          {period:"YYYY", count:1, label:"Y"},
+                                          {period:"YTD", label:"YTD"},
+                                          {period:"MAX", label:"MAX"}];
+                chart.periodSelector = periodSelector;
+
+                chart.write(chartID);
+
+
+		},
+		Graph: function(custom){
+			var config = {
+				graph:{
+					id: custom.id,
+					title: custom.title,
+					valueField: custom.valueField,
+					type: "smoothedLine",
+					fillAlphas: 0,
+					valueAxis: custom.valueAxis,
+					lineColor: custom.color,
+					lineThickness: 2,
+
+					// bullet
+					bullet: "round",
+					bulletBorderAlpha: 1,
+					bulletSize: 2,
+					useLineColorForBulletColor: true,
+					useLineColorForBulletBorder: true,
+				}
+			}
+
+			config.graph.balloon = {};
+			if(custom.enableBalloon){
+				config.graph.balloon.useGraphSettings = true;
+		        config.graph.balloon.borderThickness = 0.2;
+		        config.graph.balloon.shadowAlpha = 0;
+		        config.graph.balloon.fillColor = config.color;
+		        config.graph.balloon.color = "#ffffff";
 			}
 			else{
-				graph.balloon.enabled = false;
+				config.graph.balloon.enabled = false;
 			}
-			return graph;
+
+			return config;
 		},
 		ChartScrollbar: function(graph){
-			var chartScrollbar = new AmCharts.ChartScrollbar();
-			chartScrollbar.graph = graph;
-			// Grid
-			chartScrollbar.autoGridCount = true;
-			chartScrollbar.color = "#666666"
-			// not selected
-			chartScrollbar.backgroundAlpha = 0;
-			chartScrollbar.graphFillAlpha = 0;
-			chartScrollbar.graphLineAlpha = 0.2;
-			// selected
-			chartScrollbar.selectedBackgroundAlpha = 0.1;
-			chartScrollbar.selectedBackgroundColor = "#000000";
-			chartScrollbar.selectedGraphFillAlpha = 0;
-			chartScrollbar.selectedGraphLineAlpha = 0.5;
+			var config = {
+				chartScrollbar:{
+					graph: graph,
+					// Grid
+					autoGridCount: true,
+					color: "#666666",
+					// not selected
+					backgroundAlpha: 0,
+					graphFillAlpha: 0,
+					graphLineAlpha: 0.2,
+					// selected
+					selectedBackgroundAlpha: 0.1,
+					selectedBackgroundColor: "#000000",
+					selectedGraphFillAlpha: 0,
+					selectedGraphLineAlpha: 0.5
+				}
+			};
 
-
-			return chartScrollbar;
+			return config;
 		},
 		ValueAxis: function(id, title, position){
-			var valueAxis = new AmCharts.ValueAxis();
-			valueAxis.id = id;
-			valueAxis.title = title;
-			valueAxis.position = position;
-			valueAxis.axisAlpha = 1;
-			valueAxis.gridAlpha = 0;
-			return valueAxis;
+			var config = {
+				valueAxis: {
+					id: id,
+					title: title,
+					position: position,
+					axisAlpha: 1,
+					gridAlpha: 0
+				}
+			}
+
+			return config;
 		},
 		ChartCursor: function(){
-			var chartCursor = new AmCharts.ChartCursor();
-		    chartCursor.categoryBalloonDateFormat = "JJ:NN, MMMM DD";
-		    chartCursor.cursorPosition = "mouse";
-		    chartCursor.cursorAlpha = 0.2;
-		    chartCursor.valueLineEnabled = true;
-		    chartCursor.valueLineBalloonEnabled = true;
-		    chartCursor.valueLineAlpha = 0.3;
+			var config = {
+				chartCursor:{
+					categoryBalloonDateFormat: "JJ:NN, MMMM DD",
+					cursorPosition: "mouse",
+					cursorAlpha: 0.2,
+					valueLineEnabled: true,
+					valueLineBalloonEnabled: true,
+					valueLineAlpha: 0.3
+				}
+			};
 		    // chartCursor.limitToGraph = "priceGraph";
-		    return chartCursor
-		},
-		Legend: function() {
-			var legend = new AmCharts.AmLegend();
-		    legend.useGraphSettings = true;
-		    legend.horizontalGap = 10;
-		    legend.maxColumns = 1;
-		    legend.labelText = "[[title]]";
-
-			return legend;
+		    return config;
 		},
 		PeriodSelector: function(){
-			var periodSelector = new AmCharts.PeriodSelector();
-			periodSelector.periods = [
-			   {period:"DD", count:1, label:"1 day"},
-			   {period:"DD", selected:true, count:5, label:"5 days"},
-			   {period:"MM", count:1, label:"1 month"},
-			   {period:"YYYY", count:1, label:"1 year"}
-			];
-			console.log(periodSelector);
-			return periodSelector;
+			var config = {
+				periodSelector:{
+					periods:[
+						{period:"mm", count:1, label:"1 min"},
+						{period:"hh", count:1, label:"1 hour"}
+					]
+				}
+			}
+			return config;
+		},
+		Legend: function(divId) {
+			var config = {
+				legend:{
+					divId: divId,
+		    		useGraphSettings: true,
+		    		horizontalGap: 10,
+		    		maxColumns: 1,
+		    		labelText: "[[title]]"
+	    		}
+			}
+			return config;
 		},
 		Searcher: function(divId){
 			var scope = this;
@@ -413,4 +528,3 @@
 
 	return CHART;
 }));
-

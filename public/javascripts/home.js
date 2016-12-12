@@ -199,6 +199,8 @@ lineChart.addJsonData(priceData);
 STOCKU.addRMSE(lineChart.arrayData());
 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
 
+STOCKU.TrendLine(lineChart.arrayData());
+
 // var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
 // $("#logmsg").trigger("add", ["準確率: " + accuracySoFar, "green"]);
 
@@ -207,6 +209,9 @@ candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
 var refreshId = setInterval(() => {
     genNewData();
     accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
+    var slope = STOCKU.TrendLine(lineChart.arrayData());
+    console.log(lineChart.arrayData());
     $("#logmsg").trigger("set", ["準確率: " + accuracySoFar, "green"]);
+    $("#logmsg").trigger("add", ["迴歸線斜率: " + slope, "blue"]);
 }, 3000);
 //--------------------------------------------------
