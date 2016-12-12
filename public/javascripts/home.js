@@ -12,13 +12,12 @@ var lineChart = new STOCKU.Chart("lineChartDiv", "line");
 var candlestickChart = new STOCKU.Chart("candlestickChartDiv", "candlestick");
 var searcherblock = new STOCKU.Searcher("searcherdiv");
 var tracker = new STOCKU.Tracker("trackerdiv");
-
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
  function getPrice(stock, date) {
-     var lastTimeUpdate = STOCKU.lastTimeAppear(lineChart.arrayData(), "price");
-
+     var lastTimeUpdate = (stock == searcherblock.state.price) ?
+                            searcherblock.state.price.updateTime : undefined;
      log("Getting Price...");
      return new Promise((resolve, reject) => {
          $.get("/StockData/price", {
@@ -29,10 +28,18 @@ var tracker = new STOCKU.Tracker("trackerdiv");
              .done((response) => {
                  if (response.msg == "DataFound"){
                      $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
+                     searcherblock.state.price = {
+                         updateTime:new Date().getTime(),
+                         stock: stock
+                     };
                      resolve(response.content);
                  }
                  else if (response.msg == "DataNotFound") {
                      $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
+                     searcherblock.state.price = {
+                         updateTime:undefined,
+                         stock: stock
+                     };
                      reject(response);
                  }
                  else{
@@ -48,7 +55,8 @@ var tracker = new STOCKU.Tracker("trackerdiv");
 
 
  function getForecast(stock, date) {
-     var lastTimeUpdate = STOCKU.lastTimeAppear(lineChart.arrayData(), "forecast");
+     var lastTimeUpdate = (stock == searcherblock.state.forecast) ?
+                            searcherblock.state.forecast.updateTime : undefined;
 
      log("Getting Forecast...");
      return new Promise((resolve, reject) => {
@@ -60,10 +68,18 @@ var tracker = new STOCKU.Tracker("trackerdiv");
              .done((response) => {
                  if (response.msg == "DataFound"){
                      $("#logmsg").trigger("add", ["找到預測資料", "green"]);
+                     searcherblock.state.forecast = {
+                         updateTime:new Date().getTime(),
+                         stock: stock
+                     };
                      resolve(response.content);
                  }
                  else if (response.msg == "DataNotFound") {
                      $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
+                     searcherblock.state.forecast = {
+                         updateTime:undefined,
+                         stock: stock
+                     };
                      reject(response);
                  }
                  else{
@@ -91,8 +107,6 @@ tracker.track = function(){
 	}
 	else{
 		// zoom to old Date;
-        console.log(lineChart);
-        console.log([lineChart.prevStartTime,lineChart.prevEndTime]);
         lineChart.zoomToDates(lineChart.prevStartTime, lineChart.prevEndTime);
 		candlestickChart.zoomToDates(lineChart.prevStartTime, lineChart.prevEndTime);
 	}
@@ -116,6 +130,7 @@ function genNewData (){
     lineChart.validateData();
     candlestickChart.validateData();
     tracker.track();
+
 }
 
 
@@ -160,29 +175,25 @@ searcherblock.search = function (){
 		    (response) =>getForecast(stock, date)
 		)
 		.then(
-		    (data) => lineChart.addJsonData(data),
-            (response)=> 0
-		)
-        .then(
-            ()=>{
-                // 準確率計算
+		    (data) => {
+                lineChart.addJsonData(data)
                 STOCKU.addRMSE(lineChart.arrayData());
                 var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
                 $("#logmsg").trigger("set", ["準確率: " + accuracySoFar, "green"]);
-
                 lineChart.validateData();
-                // tracker.track();
-            }
-        );
+                tracker.track();
+            },
+            (response)=> 0
+		);
 }
 
 /**************************************************
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-// searcherblock.$.input.val(1101);
-// tracker.$.input.val(20);
-// searcherblock.$.button.mouseup();
+searcherblock.$.input.val(1101);
+tracker.$.input.val(20);
+searcherblock.$.button.mouseup();
 
 // var refreshId = setInterval(() => {
 //     searcherblock.search();
