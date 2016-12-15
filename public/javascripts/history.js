@@ -159,6 +159,7 @@ searcherblock.searcher.search = function (){
                 var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
                 $("#logmsg").trigger("set", ["準確率: " + accuracySoFar, "green"]);
                 lineChart.validateData();
+                candlestickChart.validateData();
             },
             (response)=> 0
         );

@@ -14,6 +14,7 @@
       },
       "lineThickness": 3,
       "bullet": "round",
+      "bulletSize": 0.5,
 
       "valueField": ""
     }

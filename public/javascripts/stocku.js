@@ -363,7 +363,6 @@
 					return chart.dataProvider;
 				else {
 					chart.dataProvider = arr;
-					chart.validateData();
 					return chart.dataProvider;
 				}
 			};
