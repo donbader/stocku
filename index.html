@@ -4,7 +4,6 @@
 <head>
     <title>Stocku</title>
     <meta name="robots" content="noindex" />
-
     <!-- Styles -->
     <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
@@ -22,7 +21,6 @@
     <script src="assets/amcharts/themes/light.js"></script>
     <script src="assets/jquery-3.1.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
 </head>
 
 <body>
@@ -53,18 +51,37 @@
                 <h2>今日推薦：</h2>
             </div>
             <div class="row">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#111">折線圖</a></li>
-                    <li><a data-toggle="tab" href="#222">蠟燭圖</a></li>
-                </ul>
                 <div class="tab-content col-sm-9">
-                    <div class="tab-pane fade in active" id="111">
-                            <div id="lineChartDiv"></div>
+                    <!-- 實際資訊 -->
+                    <div class="btn-group pull-left" role="group">
+                        <button id="stockNameMsg" type="button" class="btn btn-default btn-lg" title="股票名稱">股票名稱</button>
+                        <button id="closeMsg" type="button" class="btn btn-default btn-lg" title="收盤價">收盤價</button>
+                        <button id="deltaMsg" type="button" class="btn btn-default btn-lg" title="最近成交差" style="color:white;">+0.00</button>
+                        <button id="trendMsg" type="button" class="btn btn-default btn-lg" title="趨勢">趨勢</button>
                     </div>
-                    <div class="tab-pane fade" id="222">
-                        <div id="candlestickChartDiv"></div>
+                    <!-- 預測資訊 -->
+                    <div class="btn-group" role="group">
+                        <button id="forecastMsg" type="button" class="btn btn-default btn-lg" title="預測">預測</button>
+                        <button id="accuracyMsg" type="button" class="btn btn-default btn-lg" title="準確率">準確率</button>
                     </div>
 
+
+                    <div class="tab-pane fade in active" id="line">
+                        <div id="lineChartDiv"></div>
+                    </div>
+                    <div class="tab-pane fade" id="Candlestick">
+                        <div id="candlestickChartDiv"></div>
+                    </div>
+                    <div class="btn-group pull-right" style="" role="group">
+                        <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                            顯示方式
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a data-toggle="tab" href="#line">折線圖</a></li>
+                            <li><a data-toggle="tab" href="#Candlestick">蠟燭圖</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-sm-3">
                     <div class="row orm-group text-left">
@@ -72,13 +89,13 @@
                         請輸入股票代碼 & 查詢日期：
                         <div id="searcherdiv"></div>
                         <div id="trackerdiv"></div>
+                        <div id="newsdiv">這裡是新聞ＸＤＤ</div>
                         狀態：
                         <div id="logmsg"></div>
                     </div>
 
                 </div>
             </div>
-
         </div>
     </div>
     <!--     <div id="controlbox">
@@ -131,14 +148,20 @@
                 </div>
             </div>
         </div>
-
     </footer>
-
- <!-- JS -->
+    <!-- JS -->
+    <script type="text/javascript">
+    // Bootstrap dropdown bug
+    $('a[data-toggle="tab"]').on('click', function(e) {
+        var target = this.href.split("#")[1];
+        $('.dropdown-menu li.active').removeClass('active');
+        $('.tab-pane.fade.in.active').removeClass('in active');
+        $(this).parent('li').addClass('active');
+        $('#' + target).addClass('in active');
+    });
+    </script>
     <script src="javascripts/stocku.js"></script>
     <script src="javascripts/home.js"></script>
-
-
 </body>
 
 </html>

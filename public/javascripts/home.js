@@ -2,6 +2,7 @@
  *              NOTE                              *
  **************************************************/
 // lastTimeUpdate Need to be improve
+// TODO: stockNameMsg.update => Recommend
 
 
 
@@ -12,6 +13,7 @@ var lineChart = new STOCKU.Chart("lineChartDiv", "line");
 var candlestickChart = new STOCKU.Chart("candlestickChartDiv", "candlestick");
 var searcherblock = new STOCKU.Searcher("searcherdiv");
 var tracker = new STOCKU.Tracker("trackerdiv");
+var idtable = STOCKU.LoadSettings("tables/idtable.json");
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
@@ -122,7 +124,8 @@ function genNewData (){
     var nextForecast = STOCKU.randomDatum(currPrice, 5);
 
     arr[arr.length - 1].price = currPrice;
-    var nextData = {time: nextTime, forecast: nextForecast};
+    delete arr[arr.length - 1].bullet;
+    var nextData = {time: nextTime, forecast: nextForecast, bullet:"round"};
     arr.push(nextData);
 
     STOCKU.addRMSE(arr);
@@ -158,6 +161,51 @@ $("#logmsg").on("add", function(event, msg, color) {
     var msg = '<div style="color:' + color + '">' + msg + '</div>'
     this.innerHTML = this.innerHTML + "<br>" + msg;
 });
+$("#stockNameMsg").on("update", function(){
+    var stockNum = searcherblock.$.input.val();
+    this.innerHTML = stockNum ? idtable[stockNum] : "隨機";
+});
+$("#closeMsg").on("update", function(){
+    this.innerHTML = "TWD$ "
+    this.innerHTML += STOCKU.getLastElementAppear(lineChart.arrayData(),"price").element.price;
+});
+$("#deltaMsg").on("update", function(){
+    var arr = lineChart.arrayData();
+    var lastElement = STOCKU.getLastElementAppear(arr, "price");
+    var delta = lastElement.element.price - arr[lastElement.index - 1].price;
+    this.innerHTML = delta >= 0 ? '+'+ delta.toFixed(2) : delta.toFixed(2);
+    this.style["background-color"] = delta >= 0 ? "green" : "red";
+});
+
+$("#trendMsg").on("update", function(event, slope){
+    slope = slope || 0;
+    this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "("+slope.toFixed(2)+")";
+    this.style.color= slope > 0 ? "green" : slope < 0 ? "red" : "white";
+});
+
+$("#forecastMsg").on("update", function(event){
+    var forecast = STOCKU.getLastElementAppear(lineChart.arrayData(), "forecast").element.forecast;
+    var price = STOCKU.getLastElementAppear(lineChart.arrayData(), "price").element.price;
+    var delta = forecast - price;
+    this.style.color = "white";
+    this.style["background-color"] = ( delta > 0) ? "rgba(0, 125, 0, 0.5)" : (delta < 0 ) ? "rgba(255,0, 0, 0.5)" : "gray";
+    this.innerHTML = ( delta > 0) ? "可買進" : (delta < 0 ) ? "可賣出" : "持有";
+});
+
+
+$("#accuracyMsg").on("update", function(event, val){
+    val *= 100;
+    var bgcolor;
+    switch(true){
+        case val < 60: bgcolor = "rgba(0, 0, 0, 0.5)";break;
+        case val < 70: bgcolor = "rgba(255,0, 0, 0.5)";break;
+        case val <= 80: bgcolor = "rgba(255, 125, 0, 0.5)";break;
+        default: bgcolor = "rgba(0, 125, 0, 0.5)";break;
+    }
+    this.style["background-color"] = bgcolor;
+    this.style.color = "white";
+    this.innerHTML = val.toFixed(2) + "%";
+});
 
 // Override search();
 searcherblock.search = function (){
@@ -171,6 +219,8 @@ searcherblock.search = function (){
                 lineChart.addJsonData(data);
                 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5,"min"));
                 return getForecast(stock, date);
+                $("#trendMsg").trigger("update", slope);
+                $("#deltaMsg").trigger("update");
 		    },
 		    (response) =>getForecast(stock, date)
 		)
@@ -179,9 +229,12 @@ searcherblock.search = function (){
                 lineChart.addJsonData(data)
                 STOCKU.addRMSE(lineChart.arrayData());
                 var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
-                $("#logmsg").trigger("set", ["準確率: " + accuracySoFar, "green"]);
                 lineChart.validateData();
                 candlestickChart.validateData();
+                // update
+                var slope = STOCKU.TrendLine(lineChart.arrayData());
+                $("#accuracyMsg").trigger("update", accuracySoFar);
+
                 tracker.track();
             },
             (response)=> 0
@@ -212,10 +265,25 @@ STOCKU.addRMSE(lineChart.arrayData());
 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
 
 
+STOCKU.TrendLine(lineChart.arrayData());
+
+// var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
+// $("#logmsg").trigger("add", ["準確率: " + accuracySoFar, "green"]);
+STOCKU.FetchNews();
+$("#stockNameMsg").trigger("update");
+$("#deltaMsg").trigger("update");
+
 // set Interval
 var refreshId = setInterval(() => {
     genNewData();
     accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
-    $("#logmsg").trigger("set", ["準確率: " + accuracySoFar, "green"]);
+
+    var slope = STOCKU.TrendLine(lineChart.arrayData());
+    $("#accuracyMsg").trigger("update", accuracySoFar);
+    $("#closeMsg").trigger("update");
+    $("#trendMsg").trigger("update", slope);
+    $("#deltaMsg").trigger("update");
+    $("#forecastMsg").trigger("update");
+
 }, 3000);
 //--------------------------------------------------

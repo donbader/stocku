@@ -147,7 +147,7 @@ searcherblock.searcher.search = function (){
         .then(
             (data) => {
                 lineChart.addJsonData(data);
-                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5,"min"));
+                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 60,"min"));
                 return getForecast(stock, date);
             },
             (response) =>getForecast(stock, date)
@@ -169,8 +169,8 @@ searcherblock.searcher.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(1232);
-searcherblock.$.date.val("2016-11-23");
+searcherblock.$.input.val(2330);
+searcherblock.$.date.val("2016-12-14");
 searcherblock.$.button.mouseup();
 lineChart.validateData();
 

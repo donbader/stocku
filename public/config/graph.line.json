@@ -1,22 +1,13 @@
 {
-  "graphs": [
-    {
-      "id": "Line_",
-      "title": "",
+    "graphs": [{
+        "id": "Line_",
+        "title": "",
 
-      "balloonText": "[[title]]: [[value]]",
-      "balloon": {
-        "borderThickness": 0.2,
-        "cornerRadius": 10,
-        "shadowAlpha": 0,
-        "fillColor": "#000000",
-        "color": "#ffffff"
-      },
-      "lineThickness": 3,
-      "bullet": "round",
-      "bulletSize": 0.5,
-
-      "valueField": ""
-    }
-  ]
+        "lineThickness": 3,
+        "balloon": {
+            "enabled": false
+        },
+        "lineAlpha": 0.7,
+        "valueField": ""
+    }]
 }

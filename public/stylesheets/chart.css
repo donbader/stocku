@@ -3,6 +3,9 @@
 input:focus{
     outline:none;
 }
+.btn:focus, .btn:active{
+    outline:none!important;
+}
 input[type=search].stocku{
     position: relative;
     height: 25px;
@@ -40,4 +43,9 @@ input[type="date"].stocku::-webkit-clear-button {
 
 input[type=number].stocku{
     width: 50px;
+}
+
+#stockNameMsg {
+    font-size:30px;
+    font-weight: bold;
 }
