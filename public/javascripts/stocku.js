@@ -222,6 +222,9 @@
 					else if(arrData[i].price < ohlc.low )
 						ohlc.low = arrData[i].price;
 					ohlc.close = arrData[i].price;
+
+					// identify the meaning of this candlestick
+					ohlc.meaning = giveCandleStickMeaning(ohlc);
 				}
 				if (time == nextTime.getTime()){
 					startTime.plus(interval, scale);
@@ -230,6 +233,7 @@
 				}
 
 			}
+
 			return ohlcs;
 		},
 		ObjectCombine: function(a, b) {
@@ -588,4 +592,67 @@ function LeastSquares(values_x, values_y) {
     var b = (sum_y/count) - (m*sum_x)/count;
 
     return { slope : m , bias : b };
+}
+
+/**************************************************
+ *              Give candleStick meaning          *
+ **************************************************/
+function giveCandleStickMeaning(ohlc){
+
+	// set variables
+	var open = ohlc.open;
+	var close = ohlc.close;
+	var high = ohlc.high;
+	var low = ohlc.low;
+	var upper_shadow_line = 0;
+	var lower_shadow_line = 0;
+	var meaning = "Unknown";
+
+	// stock rises (red candlesticks)
+	if(open < close){
+
+		upper_shadow_line = high - close;
+		lower_shadow_line = open - low;
+
+		if( upper_shadow_line > lower_shadow_line ){
+			return "賣方力道強勁";
+		}else if( upper_shadow_line < lower_shadow_line ){
+			return "買方力道強勁";
+		}else if( upper_shadow_line == 0 && lower_shadow_line == 0){
+			return "強烈漲升";
+		}else{
+			return "股票振盪，買方勝於賣方，買氣強勁";
+		}
+
+	} else
+		// stock falls (green candlesticks)
+		if(open > close){
+
+			if( upper_shadow_line > lower_shadow_line ){
+				return "賣方力道強勁";
+			}else if( upper_shadow_line < lower_shadow_line ){
+				return "買方力道強勁";
+			}else if( upper_shadow_line == 0 && lower_shadow_line == 0){
+				return "賣壓沈重";
+			}else{
+				return "股票振盪，賣方勝於買方，賣壓沈重";
+			}
+
+		} 
+	// stock remains the same
+		else {
+
+			if( upper_shadow_line > lower_shadow_line ){
+				return "股價一度上揚，但上揚時賣方強勁，最後將股價跌到開盤價左右";
+			}else if( upper_shadow_line < lower_shadow_line ){
+				return "股價一度下跌，但下跌時買方強勁，最後將股價推升到開盤價左右";
+			}else if( upper_shadow_line == 0 && lower_shadow_line == 0){
+				return "漲停、跌停或是非常冷門的股票";
+			}else{
+				return "買賣勢均力敵";
+			}
+
+		}
+
+	return meaning;
 }
