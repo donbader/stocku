@@ -169,8 +169,8 @@ searcherblock.searcher.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(2330);
-searcherblock.$.date.val("2016-12-14");
+searcherblock.$.input.val(1101);
+searcherblock.$.date.val("2016-11-25");
 searcherblock.$.button.mouseup();
 lineChart.validateData();
 

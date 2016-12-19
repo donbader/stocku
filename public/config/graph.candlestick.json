@@ -3,7 +3,7 @@
 		"type": "candlestick",
 		"title": "Close",
 		"id": "Candlestick_",
-		"balloonText": "Open:<b>[[open]]</b><br>Low:<b>[[low]]</b><br>High:<b>[[high]]</b><br>Close:<b>[[close]]</b><br>",
+		"balloonText": "Open:<b>[[open]]</b><br>Low:<b>[[low]]</b><br>High:<b>[[high]]</b><br>Close:<b>[[close]]</b><br>Meaning:<b>[[meaning]]</b><br>",
 		"closeField": "close",
 		"fillAlphas": 0.9,
 		"fillColors": "#db4c3c",
