@@ -266,6 +266,19 @@
 		},
 		FetchNews: function(){
 			console.log("Fetching News...");
+			$.ajax({
+				type:"GET",
+				url: "/StockData/News",
+				success: function(html){
+					var newsdiv = $("#newsdiv");
+					var table = $(html);
+					newsdiv.append(table);
+					newsdiv.prepend("重大要聞");
+					table.find('.geminiAd').remove();
+					table.find('.stext').remove();
+					console.log(table.html());
+				}
+			})
 		},
 		LoadSettings: function(url, valueField) {
 			var config;

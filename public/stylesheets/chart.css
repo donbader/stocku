@@ -49,3 +49,7 @@ input[type=number].stocku{
     font-size:30px;
     font-weight: bold;
 }
+
+#newsdiv {
+    border: #888888 solid 2px;
+}
