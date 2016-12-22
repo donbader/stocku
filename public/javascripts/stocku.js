@@ -199,7 +199,7 @@
 				square = data[i].rmse_acc_square;
 				size = data[i].rmse_acc_size;
 			}
-		},
+		}, 
 		ToOhlc: function(arrData, interval, scale) {
 			interval = interval || 5;
 			scale = scale || "min";
@@ -260,11 +260,20 @@
 			}
 			return a;
 		},
-		getLastElementAppear: function(arr, elementName) {
+		getLastElementAppear: function(arr, elementName, reverse) {
 			if (arr === undefined) return;
-			for (var i = arr.length; i >= 0; --i) {
-				if (arr[i] !== undefined && arr[i][elementName] !== undefined) {
-					return {element: arr[i],index:i};
+			if(!reverse){
+				for (var i = arr.length - 1; i >= 0; --i) {
+					if (arr[i] !== undefined && arr[i][elementName] !== undefined) {
+						return {element: arr[i],index:i};
+					}
+				}
+			}
+			else{
+				for (var i = 0; i < arr.length; ++i) {
+					if (arr[i] !== undefined && arr[i][elementName] !== undefined) {
+						return {element: arr[i],index:i};
+					}
 				}
 			}
 		},
@@ -280,7 +289,7 @@
 					newsdiv.prepend("重大要聞");
 					table.find('.geminiAd').remove();
 					table.find('.stext').remove();
-					console.log(table.html());
+					// console.log(table.html());
 				}
 			})
 		},
@@ -340,11 +349,13 @@
 		},
 		TrendLine: function(arr){
 			var x = [],y = [];
-			// TODO: Regression line implement
+
+			// You can use this function to find first index of price
+			var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
 			for(var i = 0;i<arr.length - 1;i++){
 				arr[i]['reg'] = null;
 				x[i] = i;
-				y[i] = arr[i]['price'];
+				y[i] = parseFloat(arr[i]['price']);
 			}
 			var formular = LeastSquares(x,y);
 			//console.log(formular);

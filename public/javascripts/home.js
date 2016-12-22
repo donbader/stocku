@@ -180,7 +180,7 @@ $("#deltaMsg").on("update", function(){
 $("#trendMsg").on("update", function(event, slope){
     slope = slope || 0;
     this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "("+slope.toFixed(2)+")";
-    this.style.color= slope > 0 ? "green" : slope < 0 ? "red" : "white";
+    this.style.color= slope > 0 ? "green" : slope < 0 ? "red" : "gray";
 });
 
 $("#forecastMsg").on("update", function(event){
@@ -218,9 +218,12 @@ searcherblock.search = function (){
 		    (data) => {
                 lineChart.addJsonData(data);
                 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5,"min"));
-                return getForecast(stock, date);
+                var slope = STOCKU.TrendLine(lineChart.arrayData());
+                $("#stockNameMsg").trigger("update");
                 $("#trendMsg").trigger("update", slope);
                 $("#deltaMsg").trigger("update");
+                $("#closeMsg").trigger("update");
+                return getForecast(stock, date);
 		    },
 		    (response) =>getForecast(stock, date)
 		)
@@ -229,15 +232,13 @@ searcherblock.search = function (){
                 lineChart.addJsonData(data)
                 STOCKU.addRMSE(lineChart.arrayData());
                 var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
+                $("#accuracyMsg").trigger("update", accuracySoFar);
+                $("#forecastMsg").trigger("update");
                 lineChart.validateData();
                 candlestickChart.validateData();
-                // update
-                var slope = STOCKU.TrendLine(lineChart.arrayData());
-                $("#accuracyMsg").trigger("update", accuracySoFar);
 
                 tracker.track();
-            },
-            (response)=> 0
+            }
 		);
 }
 

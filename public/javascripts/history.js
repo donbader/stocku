@@ -10,6 +10,7 @@
 var lineChart = new STOCKU.Chart("lineChartDiv", "line");
 var candlestickChart = new STOCKU.Chart("candlestickChartDiv","candlestick");
 var searcherblock = new STOCKU.SearcherWithDate("searcherdiv");
+var idtable = STOCKU.LoadSettings("tables/idtable.json");
 
 
 /**************************************************
@@ -137,6 +138,43 @@ $("#logmsg").on("add", function(event, msg, color) {
     this.innerHTML = this.innerHTML + "<br>" + msg;
 });
 
+$("#stockNameMsg").on("update", function(){
+    var stockNum = searcherblock.$.input.val();
+    this.innerHTML = stockNum ? idtable[stockNum] : "隨機";
+});
+$("#closeMsg").on("update", function(){
+    this.innerHTML = "TWD$ "
+    this.innerHTML += STOCKU.getLastElementAppear(lineChart.arrayData(),"price").element.price;
+});
+$("#deltaMsg").on("update", function(){
+    var arr = lineChart.arrayData();
+    var lastElement = STOCKU.getLastElementAppear(arr, "price");
+    var delta = lastElement.element.price - arr[lastElement.index - 1].price;
+    this.innerHTML = delta >= 0 ? '+'+ delta.toFixed(2) : delta.toFixed(2);
+    this.style["background-color"] = delta >= 0 ? "green" : "red";
+});
+
+$("#trendMsg").on("update", function(event, slope){
+    slope = slope || 0;
+    this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "("+slope.toFixed(2)+")";
+    this.style.color= slope > 0 ? "green" : slope < 0 ? "red" : "gray";
+});
+
+
+$("#accuracyMsg").on("update", function(event, val){
+    val *= 100;
+    var bgcolor;
+    switch(true){
+        case val < 60: bgcolor = "rgba(0, 0, 0, 0.5)";break;
+        case val < 70: bgcolor = "rgba(255,0, 0, 0.5)";break;
+        case val <= 80: bgcolor = "rgba(255, 125, 0, 0.5)";break;
+        default: bgcolor = "rgba(0, 125, 0, 0.5)";break;
+    }
+    this.style["background-color"] = bgcolor;
+    this.style.color = "white";
+    this.innerHTML = val.toFixed(2) + "%";
+});
+
 // Override search();
 searcherblock.searcher.search = function (){
     // clear data
@@ -148,6 +186,9 @@ searcherblock.searcher.search = function (){
             (data) => {
                 lineChart.addJsonData(data);
                 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 60,"min"));
+                $("#stockNameMsg").trigger("update");
+                $("#deltaMsg").trigger("update");
+                $("#closeMsg").trigger("update");
                 return getForecast(stock, date);
             },
             (response) =>getForecast(stock, date)
@@ -157,11 +198,14 @@ searcherblock.searcher.search = function (){
                 lineChart.addJsonData(data);
                 STOCKU.addRMSE(lineChart.arrayData());
                 var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
-                $("#logmsg").trigger("set", ["準確率: " + accuracySoFar, "green"]);
+                $("#accuracyMsg").trigger("update", accuracySoFar);
+
+                var slope = STOCKU.TrendLine(lineChart.arrayData());
+                $("#trendMsg").trigger("update", slope);
+
                 lineChart.validateData();
                 candlestickChart.validateData();
-            },
-            (response)=> 0
+            }
         );
 }
 
@@ -169,8 +213,8 @@ searcherblock.searcher.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(1101);
-searcherblock.$.date.val("2016-11-25");
+searcherblock.$.input.val(1232);
+searcherblock.$.date.val("2016-11-23");
 searcherblock.$.button.mouseup();
 lineChart.validateData();
 
