@@ -175,6 +175,17 @@ $("#accuracyMsg").on("update", function(event, val){
     this.innerHTML = val.toFixed(2) + "%";
 });
 
+$("#timeScale").on("modify",function(event, val){
+    var arr = STOCKU.JsonToArray(lineChart.jsonData);
+    var timeScaleArr = STOCKU.TimeScale(arr,val);
+    lineChart.arrayData(timeScaleArr);
+    lineChart.validateData();
+    // console.log(arr)
+    candlestickChart.arrayData(STOCKU.ToOhlc(arr, val,"min"));
+    candlestickChart.validateData();
+
+});
+
 // Override search();
 searcherblock.searcher.search = function (){
     // clear data
@@ -185,7 +196,7 @@ searcherblock.searcher.search = function (){
         .then(
             (data) => {
                 lineChart.addJsonData(data);
-                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 60,"min"));
+                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 1,"min"));
                 $("#stockNameMsg").trigger("update");
                 $("#deltaMsg").trigger("update");
                 $("#closeMsg").trigger("update");
@@ -203,6 +214,7 @@ searcherblock.searcher.search = function (){
                 var slope = STOCKU.TrendLine(lineChart.arrayData());
                 $("#trendMsg").trigger("update", slope);
 
+                lineChart.updateJsonFromArray();
                 lineChart.validateData();
                 candlestickChart.validateData();
             }
@@ -217,7 +229,6 @@ searcherblock.$.input.val(1232);
 searcherblock.$.date.val("2016-11-23");
 searcherblock.$.button.mouseup();
 lineChart.validateData();
-
 // //--------------------------------------------------
 
 // // Random Data

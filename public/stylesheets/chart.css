@@ -5,6 +5,7 @@ input:focus{
 }
 .btn:focus, .btn:active{
     outline:none!important;
+    background-color: inherit;
 }
 input[type=search].stocku{
     position: relative;

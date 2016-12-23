@@ -120,14 +120,32 @@
 		JsonToArray: function(obj) {
 			var arr = [];
 			for (var prop in obj) {
-				arr.push({
-					time: prop
-				});
+				var toPushIn = {time:prop};
 				for (var inner in obj[prop]) {
-					arr[arr.length - 1][inner] = obj[prop][inner];
+					toPushIn[inner] = obj[prop][inner];
 				}
+				arr.push(toPushIn);
 			}
 			return arr;
+		},
+		ArrayToJson: function(arr){
+			var obj = {};
+			for(var i=0;i<arr.length;++i){
+				obj[arr[i].time] = {};
+				for(var inner in arr[i]){
+					if(inner == "time")continue;
+					obj[arr[i].time][inner] = arr[i][inner];
+				}
+			}
+			return obj;
+		},
+		TimeScale: function(arr, interval){
+			if(!interval || interval === 1)return arr;
+			var newArr = [];
+			for(var i=0;i<arr.length;i+=interval){
+				newArr.push(arr[i]);
+			}
+			return newArr;
 		},
 		calcAccuracy: function(prevData, currData) {
 			if (prevData === undefined || currData === undefined || currData.price === undefined || currData.forecast === undefined || prevData.price === undefined)
@@ -199,17 +217,19 @@
 				square = data[i].rmse_acc_square;
 				size = data[i].rmse_acc_size;
 			}
-		}, 
+		},
 		ToOhlc: function(arrData, interval, scale) {
 			interval = interval || 5;
 			scale = scale || "min";
-			var startTime = new Date(arrData[0].time);
+			var firstIndex = STOCKU.getLastElementAppear(arrData, "price",true).index;
+			var startTime = new Date(arrData[firstIndex].time);
 			var nextTime = new Date(startTime).plus(interval, scale);
 			var ohlc;
 			var ohlcs = [];
-			for (var i = 0; i < arrData.length; ++i) {
+			for (var i = firstIndex; i < arrData.length; ++i) {
 				if(!arrData[i].price)continue;
 				var time = new Date(arrData[i].time).getTime();
+				// console.log("time",new Date(time));
 				if(time == startTime.getTime()){
 					ohlcs.push({time: startTime.yyyymmddHHMMSS()});
 					ohlc = ohlcs[ohlcs.length - 1];
@@ -399,11 +419,12 @@
 				chart.dataProvider[chart.dataProvider.length - 1].bullet = "round";
 
 			};
-			this.arrayData = function(arr) {
+			this.arrayData = function(arr, changeJson) {
 				// record old dates
 				this.prevStartTime = chart.startDate;
 				this.prevEndTime = chart.endDate;
 
+				changeJson = changeJson || true;
 				if (arr === undefined)
 					return chart.dataProvider;
 				else {
@@ -413,8 +434,15 @@
 			};
 			this.zoomToDates = function(start, end) {
 				return chart.zoomToDates(start, end);
-			}
+			};
 			this.validateData = () => chart.validateData();
+			this.reloadDataFromJson = function(){
+				var scope = this;
+				chart.dataProvider = STOCKU.JsonToArray(scope.json);
+			};
+			this.updateJsonFromArray = function(){
+				this.jsonData = STOCKU.ArrayToJson(chart.dataProvider);
+			};
 
 			this.add = function (component, axis){
 				switch(arguments.length){

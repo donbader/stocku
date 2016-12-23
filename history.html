@@ -88,6 +88,21 @@
                         <div id="candlestickChartDiv"></div>
                     </div>
                     <div class="btn-group pull-right" style="" role="group">
+                        <button id="timeScale" type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                            時間單位
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a onclick='$("#timeScale").trigger("modify",1)'>1 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",5)'>5 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",10)'>10 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",15)'>15 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",20)'>20 Min</a></li>
+                        </ul>
+
+                    </div>
+                    <div class="btn-group pull-right" style="" role="group">
+
                         <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
                             顯示方式
                             <span class="caret"></span>
