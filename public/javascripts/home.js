@@ -207,6 +207,18 @@ $("#accuracyMsg").on("update", function(event, val){
     this.innerHTML = val.toFixed(2) + "%";
 });
 
+$("#timeScale").on("modify",function(event, val){
+    var arr = STOCKU.JsonToArray(lineChart.jsonData);
+    var timeScaleArr = STOCKU.TimeScale(arr,val);
+    lineChart.arrayData(timeScaleArr);
+    lineChart.validateData();
+    // console.log(arr)
+    candlestickChart.arrayData(STOCKU.ToOhlc(arr, val,"min"));
+    candlestickChart.validateData();
+
+});
+
+
 // Override search();
 searcherblock.search = function (){
 	// clear data
@@ -234,6 +246,8 @@ searcherblock.search = function (){
                 var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
                 $("#accuracyMsg").trigger("update", accuracySoFar);
                 $("#forecastMsg").trigger("update");
+
+                lineChart.updateJsonFromArray();
                 lineChart.validateData();
                 candlestickChart.validateData();
 
