@@ -371,17 +371,20 @@
 			var x = [],y = [];
 
 			// You can use this function to find first index of price
-			var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
-			for(var i = 0;i<arr.length - 1;i++){
-				arr[i]['reg'] = null;
-				x[i] = i;
-				y[i] = parseFloat(arr[i]['price']);
+			//var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
+			for(var i = 0,valid_count = 0;i<arr.length - 1;i++){
+				if(arr[i]['price'] !== undefined && arr[i]['price'] !== null){
+					arr[i]['reg'] = null;
+					x[valid_count] = i;
+					y[valid_count] = parseFloat(arr[i]['price']);
+					valid_count++;
+				}
 			}
 			var formular = LeastSquares(x,y);
-			//console.log(formular);
-			arr[0]['reg'] = formular['bias'].toFixed(2);
-			arr[arr.length - 1]['reg'] = (arr.length - 1) * formular['slope'] + formular['bias'];
-			arr[arr.length - 1]['reg'] = arr[arr.length - 1]['reg'].toFixed(2);
+			//console.log(arr);
+			arr[x[0]]['reg'] = formular['bias'].toFixed(2);
+			arr[x[x.length - 1]]['reg'] = (x.length - 1) * formular['slope'] + formular['bias'];
+			arr[x[x.length - 1]]['reg'] = arr[x[x.length - 1]]['reg'].toFixed(2);
 			return formular['slope'];
 		},
 		/**************************************************
