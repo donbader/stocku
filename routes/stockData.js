@@ -1,6 +1,11 @@
 var express = require('express');
 var path = require('path');
 var fs = require('fs');
+var iconv = require('iconv-lite');
+var request = require('request');
+var $ = require('jquery')(require("jsdom").jsdom().defaultView);
+
+
 var router = express.Router();
 
 var updateTime = new Date();
@@ -8,184 +13,130 @@ var updateTime = new Date();
 
 
 /* GET stock data page. */
-router.get('/price_2', function(req, res) {
-	console.log("[GET] 'StockData/price'");
-	console.log(req.query);
-	var date = req.query.date.split('-').join('');
-	var stock = req.query.stock;
-	var lastTimeUpdate = req.query.lastTimeUpdate;
-	var file_path = 'database/price/' + date + '_' + stock + '.csv';
-	try{
-		var data = fs.readFileSync(file_path, 'utf-8');
-		if(!lastTimeUpdate
-			|| (Number(lastTimeUpdate) < updateTime.getTime()
-			&& (new Date()).getTime() > updateTime.getTime())){
-			console.log('\tSend DataFound');
-			res.send({
-				msg: 'DataFound',
-				content: parseCSVToJSON(data)
-			});
-		}
-		else {
-			console.log('\tSend AlreadyUpdate');
-			res.send({
-				msg: 'AlreadyUpdate'
-			});
-		}
-	}catch(err){
-		res.send({
-			msg: 'DataNotFound'
-		});
-	}
-});
-router.get('/forecast_2', function(req, res) {
-	console.log("[GET] 'StockData/forecast'");
-	console.log(req.query);
-	var date = req.query.date.split('-').join('');
-	var stock = req.query.stock;
-	var lastTimeUpdate = req.query.lastTimeUpdate;
-	var file_path = 'database/forecast/' + date + '_' + stock + '.forecast.csv';
-	try{
-		var data = fs.readFileSync(file_path, 'utf-8');
-		if(!lastTimeUpdate
-			|| (Number(lastTimeUpdate) < updateTime.getTime()
-			&& (new Date()).getTime() > updateTime.getTime())){
-			console.log('\tSend DataFound');
-			res.send({
-				msg: 'DataFound',
-				content: parseCSVToJSON(data)
-			});
-		}
-		else {
-			console.log('\tSend AlreadyUpdate');
-			res.send({
-				msg: 'AlreadyUpdate'
-			});
-		}
-	}catch(err){
-		res.send({
-			msg: 'DataNotFound'
-		});
-	}
-});
-
 router.get('/price', function(req, res) {
-	process.stdout.write("[GET] 'StockData/price'   \t");
-	console.log(req.query);
-	var date = req.query.date.split('-').join('');
-	var stock = req.query.stock;
-	var lastTimeUpdate = req.query.lastTimeUpdate;
-	var file_path = 'database/price/' + date + '_' + stock + '.csv';
-	fs.readFile(file_path,'utf-8', (err, data)=>{
-		if(err){
-			console.error(err);
-			res.send({
-				msg: 'DataNotFound',
-				stock: stock,
-				date: date
-			})
-			return;
-		}
+    process.stdout.write("[GET] 'StockData/price'   \t");
+    console.log(req.query);
+    var date = req.query.date.split('-').join('');
+    var stock = req.query.stock;
+    var lastTimeUpdate = req.query.lastTimeUpdate;
+    var file_path = 'database/price/' + date + '_' + stock + '.csv';
+    fs.readFile(file_path, 'utf-8', (err, data) => {
+        if (err) {
+            console.error(err);
+            res.send({
+                msg: 'DataNotFound',
+                stock: stock,
+                date: date
+            })
+            return;
+        }
 
-		if(!lastTimeUpdate
-			|| (Number(lastTimeUpdate) < updateTime.getTime()
-			&& (new Date()).getTime() > updateTime.getTime())){
-			res.send({
-				msg: 'DataFound',
-				stock: stock,
-				date: date,
-				content: parseCSVToJSON(data)
-			});
-		}
-		else{
-			res.send({
-				msg: 'AlreadyUpdate'
-			});
-		}
+        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime() && (new Date()).getTime() > updateTime.getTime())) {
+            res.send({
+                msg: 'DataFound',
+                stock: stock,
+                date: date,
+                content: parseCSVToJSON(data)
+            });
+        } else {
+            res.send({
+                msg: 'AlreadyUpdate'
+            });
+        }
 
-	});
+    });
 });
+
 
 router.get('/forecast', function(req, res) {
-	process.stdout.write("[GET] 'StockData/forecast'\t");
-	console.log(req.query);
-	var date = req.query.date.split('-').join('');
-	var stock = req.query.stock;
-	var lastTimeUpdate = req.query.lastTimeUpdate;
-	var file_path = 'database/forecast/' + date + '_' + stock + '.fc.csv';
-	fs.readFile(file_path,'utf-8', (err, data)=>{
-		if(err){
-			console.error(err);
-			res.send({
-				msg: 'DataNotFound'
-			})
-			return;
-		}
-		if(!lastTimeUpdate
-			|| (Number(lastTimeUpdate) < updateTime.getTime()
-			&& (new Date()).getTime() > updateTime.getTime())){
-			res.send({
-				msg: 'DataFound',
-				stock: stock,
-				date: date,
-				content: parseCSVToJSON(data)
-			});
-		}
-		else{
-			res.send({
-				msg: 'AlreadyUpdate'
-			});
-		}
-	});
+    process.stdout.write("[GET] 'StockData/forecast'\t");
+    console.log(req.query);
+    var date = req.query.date.split('-').join('');
+    var stock = req.query.stock;
+    var lastTimeUpdate = req.query.lastTimeUpdate;
+    var file_path = 'database/forecast/' + date + '_' + stock + '.fc.csv';
+    fs.readFile(file_path, 'utf-8', (err, data) => {
+        if (err) {
+            console.error(err);
+            res.send({
+                msg: 'DataNotFound'
+            })
+            return;
+        }
+        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime() && (new Date()).getTime() > updateTime.getTime())) {
+            res.send({
+                msg: 'DataFound',
+                stock: stock,
+                date: date,
+                content: parseCSVToJSON(data)
+            });
+        } else {
+            res.send({
+                msg: 'AlreadyUpdate'
+            });
+        }
+    });
+});
+
+router.get('/News', function(req, res) {
+    request({
+        url: 'https://tw.stock.yahoo.com/',
+        encoding: null
+    }, function(err, response, body) {
+        if (!err && response.statusCode == 200) {
+            var str = iconv.decode(new Buffer(body), "big5");
+            var headline = $('<html>').html(str).find("#headlineContainer");
+            res.send(headline.html());
+        }
+    });
+
 });
 
 
-
-
-function parseCSV(data, delimiter){
-	data = data.split('\n');
-	delimiter = delimiter || ',';
-	var KeyNames = data[0].split(delimiter);
-	var objects = [];
-	for(var i = 1; i < data.length; ++i){
-		var elements = data[i].split(delimiter);
-		if(elements.length != KeyNames.length)continue;
-		var obj = {};
-		for(var k in KeyNames){
-			obj[KeyNames[k]] = elements[k];
-		}
-		objects.push(obj);
-	}
-	return objects;
-}
-function parseCSVToJSON(data, delimiter){
-	data = data.split('\n');
-	delimiter = delimiter || ',';
-	var KeyNames = data[0].split(delimiter);
-	var objects = {};
-	for(var i = 1; i < data.length; ++i){
-		var elements = data[i].split(delimiter);
-		if(elements.length != KeyNames.length)continue;
-		objects[elements[0]] = objects[elements[0]] || {};
-		for(var k = 1 ; k < KeyNames.length; ++k){
-			objects[elements[0]][KeyNames[k]] = elements[k];
-		}
-	}
-	return objects;
+function parseCSV(data, delimiter) {
+    data = data.split('\n');
+    delimiter = delimiter || ',';
+    var KeyNames = data[0].split(delimiter);
+    var objects = [];
+    for (var i = 1; i < data.length; ++i) {
+        var elements = data[i].split(delimiter);
+        if (elements.length != KeyNames.length) continue;
+        var obj = {};
+        for (var k in KeyNames) {
+            obj[KeyNames[k]] = elements[k];
+        }
+        objects.push(obj);
+    }
+    return objects;
 }
 
-function filter(data, startTime, endTime){
-	startTime = new Date(startTime).getTime();
-	endTime = new Date(endTime).getTime();
-	return data.filter((element)=>{
-		var time = new Date(element.time).getTime();
-		return time >= startTime && time <= endTime;
-	});
+function parseCSVToJSON(data, delimiter) {
+    data = data.split('\n');
+    delimiter = delimiter || ',';
+    var KeyNames = data[0].split(delimiter);
+    var objects = {};
+    for (var i = 1; i < data.length; ++i) {
+        var elements = data[i].split(delimiter);
+        if (elements.length != KeyNames.length) continue;
+        objects[elements[0]] = objects[elements[0]] || {};
+        for (var k = 1; k < KeyNames.length; ++k) {
+            objects[elements[0]][KeyNames[k]] = elements[k];
+        }
+    }
+    return objects;
 }
 
-router.setUpdateTime = function(date){
-	updateTime = date;
+function filter(data, startTime, endTime) {
+    startTime = new Date(startTime).getTime();
+    endTime = new Date(endTime).getTime();
+    return data.filter((element) => {
+        var time = new Date(element.time).getTime();
+        return time >= startTime && time <= endTime;
+    });
+}
+
+router.setUpdateTime = function(date) {
+    updateTime = date;
 }
 
 module.exports = router;
-

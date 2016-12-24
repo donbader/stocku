@@ -3,7 +3,11 @@
 input:focus{
     outline:none;
 }
-input[type=search]{
+.btn:focus, .btn:active{
+    outline:none!important;
+    background-color: inherit;
+}
+input[type=search].stocku{
     position: relative;
     height: 25px;
     border: 2px solid #ccc;
@@ -12,7 +16,7 @@ input[type=search]{
     padding: 2px 3px 2px 3px;
 }
 
-input[type=button]{
+input[type=button].stocku{
     position: relative;
     width: 25px;
     height: 25px;
@@ -23,7 +27,7 @@ input[type=button]{
 
 
 
-input[type=date]{
+input[type=date].stocku{
     position: relative;
     height: 25px;
     border: 2px solid #ccc;
@@ -33,11 +37,20 @@ input[type=date]{
 }
 
 
-input[type="date"]::-webkit-clear-button {
+input[type="date"].stocku::-webkit-clear-button {
   -webkit-appearance: none;
   display: none;
 }
 
-input[type=number]{
+input[type=number].stocku{
     width: 50px;
+}
+
+#stockNameMsg {
+    font-size:30px;
+    font-weight: bold;
+}
+
+#newsdiv {
+    border: #888888 solid 2px;
 }

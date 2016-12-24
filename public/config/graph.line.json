@@ -1,0 +1,13 @@
+{
+    "graphs": [{
+        "id": "Line_",
+        "title": "",
+
+        "lineThickness": 3,
+        "balloon": {
+            "enabled": false
+        },
+        "lineAlpha": 0.7,
+        "valueField": ""
+    }]
+}

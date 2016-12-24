@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +9,7 @@
 
     <title>Stocku</title>
 
-   <!-- Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/elegant-font/code/style.css">
@@ -25,14 +26,19 @@
     <script src="assets/amcharts/plugins/export/export.min.js"></script>
     <script src="assets/amcharts/themes/light.js"></script>
     <script src="assets/jquery-3.1.1.min.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
     <!-- <script src="https://code.jquery.com/jquery-1.12.3.js"></script> -->
-<!--     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <!--     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.7/d3.min.js" integrity="sha256-UE//NUN7Ta3VYcPjMbH1uM/uiCju935oA+LsIf55TwU=" crossorigin="anonymous"></script>
- --></head>
+ -->
+</head>
+
 <body>
 
-<!-- the section for navigation -->
+    <!-- the section for navigation -->
     <nav class="navbar" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -54,29 +60,74 @@
         </div>
     </nav>
 
-<!-- the section for amchart -->
+    <!-- the section for amchart -->
     <div class="block-3-container section-container what-we-do-container">
         <div class="container">
             <div class="row">
                 <h2>&nbsp</h2>
             </div>
             <div class="row">
-                <div class="col-sm-9">
-                    <div id="chartdiv"></div>
+            <div class="tab-content col-sm-9">
+                    <!-- 實際資訊 -->
+                    <div class="btn-group pull-left" role="group">
+                        <button id="stockNameMsg" type="button" class="btn btn-default btn-lg" title="股票名稱">股票名稱</button>
+                        <button id="closeMsg" type="button" class="btn btn-default btn-lg" title="收盤價">收盤價</button>
+                        <button id="deltaMsg" type="button" class="btn btn-default btn-lg" title="最近成交差" style="color:white;">+0.00</button>
+                        <button id="trendMsg" type="button" class="btn btn-default btn-lg" title="趨勢">趨勢</button>
+                    </div>
+                    <!-- 預測資訊 -->
+                    <div class="btn-group" role="group">
+                        <button id="accuracyMsg" type="button" class="btn btn-default btn-lg" title="準確率">準確率</button>
+                    </div>
+
+
+                    <div class="tab-pane fade in active" id="line">
+                        <div id="lineChartDiv"></div>
+                    </div>
+                    <div class="tab-pane fade" id="Candlestick">
+                        <div id="candlestickChartDiv"></div>
+                    </div>
+                    <div class="btn-group pull-right" style="" role="group">
+                        <button id="timeScale" type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                            時間單位
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a onclick='$("#timeScale").trigger("modify",1)'>1 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",5)'>5 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",10)'>10 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",15)'>15 Min</a></li>
+                            <li><a onclick='$("#timeScale").trigger("modify",20)'>20 Min</a></li>
+                        </ul>
+
+                    </div>
+                    <div class="btn-group pull-right" style="" role="group">
+
+                        <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                            顯示方式
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a data-toggle="tab" href="#line">折線圖</a></li>
+                            <li><a data-toggle="tab" href="#Candlestick">蠟燭圖</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-sm-3">
                     <div class="row orm-group text-left">
+                        <div id="legenddiv"></div>
                         請輸入股票代碼 & 查詢日期：
                         <div id="searcherdiv"></div>
-                        <div id="legenddiv"></div>
                         狀態：
                         <div id="logmsg"></div>
                     </div>
 
                 </div>
             </div>
-        </div> <!-- end of tag of <div class="container"> -->
-    </div> <!-- end of tag of <div class="block-3-container section-container what-we-do-container"> -->
+        </div>
+        <!-- end of tag of <div class="container"> -->
+    </div>
+    <!-- end of tag of <div class="block-3-container section-container what-we-do-container"> -->
 
     <!-- Here is the code for history -->
     <script type="text/javascript" src="javascripts/stocku.js"></script>
@@ -126,4 +177,5 @@
     </footer>
 
 </body>
+
 </html>

@@ -4,21 +4,26 @@ var router = express.Router();
 
 
 /* GET home page. */
-router.get('/', function(req, res, next){
+router.get('/', function(req, res){
 	res.sendFile(path.join(__dirname, '../', 'index.html'));
 });
 
-router.get('/Home', function(req, res, next){
+router.get('/Home', function(req, res){
 	res.sendFile(path.join(__dirname, '../', 'index.html'));
 });
 
-router.get('/history', function(req, res, next){
+router.get('/history', function(req, res){
 	res.sendFile(path.join(__dirname, '../', 'history.html'));
 });
 
-router.get('/stockid', function(req, res, next){
+router.get('/stockid', function(req, res){
 	res.sendFile(path.join(__dirname, '../', 'stockid.html'));
 });
+
+router.get('/test', function(req, res){
+	res.sendFile(path.join(__dirname, '../', 'test.html'));
+});
+
 
 
 module.exports = router;
