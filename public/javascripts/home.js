@@ -14,6 +14,7 @@ var candlestickChart = new STOCKU.Chart("candlestickChartDiv", "candlestick");
 var searcherblock = new STOCKU.Searcher("searcherdiv");
 var tracker = new STOCKU.Tracker("trackerdiv");
 var idtable = STOCKU.LoadSettings("tables/idtable.json");
+var timeScale = 1;
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
@@ -115,7 +116,7 @@ tracker.track = function(){
 }
 
 function genNewData (){
-    var arr = lineChart.arrayData();
+    var arr = STOCKU.JsonToArray(lineChart.jsonData);
     var currTime = new Date(arr[arr.length - 1].time);
     var nextTime = new Date(currTime);
     nextTime.setMinutes(currTime.getMinutes() + 1);
@@ -127,9 +128,19 @@ function genNewData (){
     delete arr[arr.length - 1].bullet;
     var nextData = {time: nextTime, forecast: nextForecast, bullet:"round"};
     arr.push(nextData);
-
     STOCKU.addRMSE(arr);
-    candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
+    lineChart.updateJsonFromArray(arr);
+    var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
+    var slope = STOCKU.TrendLine(lineChart.arrayData());
+    $("#accuracyMsg").trigger("update", accuracySoFar);
+    $("#closeMsg").trigger("update");
+    $("#trendMsg").trigger("update", slope);
+    $("#deltaMsg").trigger("update");
+    $("#forecastMsg").trigger("update");
+
+
+    $("#timeScale").trigger('modify',timeScale);
+
     lineChart.validateData();
     candlestickChart.validateData();
     tracker.track();
@@ -208,6 +219,7 @@ $("#accuracyMsg").on("update", function(event, val){
 });
 
 $("#timeScale").on("modify",function(event, val){
+    timeScale = val;
     var arr = STOCKU.JsonToArray(lineChart.jsonData);
     var timeScaleArr = STOCKU.TimeScale(arr,val);
     lineChart.arrayData(timeScaleArr);
@@ -291,14 +303,5 @@ $("#deltaMsg").trigger("update");
 // set Interval
 var refreshId = setInterval(() => {
     genNewData();
-    accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
-
-    var slope = STOCKU.TrendLine(lineChart.arrayData());
-    $("#accuracyMsg").trigger("update", accuracySoFar);
-    $("#closeMsg").trigger("update");
-    $("#trendMsg").trigger("update", slope);
-    $("#deltaMsg").trigger("update");
-    $("#forecastMsg").trigger("update");
-
 }, 3000);
 //--------------------------------------------------

@@ -443,8 +443,11 @@
 				var scope = this;
 				chart.dataProvider = STOCKU.JsonToArray(scope.json);
 			};
-			this.updateJsonFromArray = function(){
-				this.jsonData = STOCKU.ArrayToJson(chart.dataProvider);
+			this.updateJsonFromArray = function(arr){
+				if(!arr)
+					this.jsonData = STOCKU.ArrayToJson(chart.dataProvider);
+				else
+					this.jsonData = STOCKU.ArrayToJson(arr);
 			};
 
 			this.add = function (component, axis){
