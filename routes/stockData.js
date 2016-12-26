@@ -92,6 +92,26 @@ router.get('/News', function(req, res) {
 
 });
 
+router.get('/AccuracyHistory',function(req,res){
+    var stock = req.query.stock;
+    var file_path = 'database/accuracy/acc_' + stock + '.csv';
+
+    fs.readFile(file_path,'utf-8',(err,data)=>{
+        if (err) {
+            console.error(err);
+            res.send({
+                msg: 'DataNotFound'
+            })
+            return;
+        }
+        res.send({
+            msg: 'DataFound',
+            stock: stock,
+            content: parseCSVToJSON(data)
+        });
+    });
+})
+
 
 function parseCSV(data, delimiter) {
     data = data.split('\n');

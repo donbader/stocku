@@ -81,13 +81,17 @@
                     </div>
 
 
-                    <div class="tab-pane fade in active" id="line">
+                    <div class="tab-pane fade in active" id="lineChart">
                         <div id="lineChartDiv"></div>
                     </div>
-                    <div class="tab-pane fade" id="Candlestick">
+                    <div class="tab-pane fade" id="candlestickChart">
                         <div id="candlestickChartDiv"></div>
                     </div>
-                    <div class="btn-group pull-right" style="" role="group">
+                    <div class="tab-pane fade" id="accuracyHistoryChart">
+                        <div id="accuracyHistoryDiv"></div>
+                    </div>
+
+                    <div class="btn-group dropup pull-right" style="" role="group">
                         <button id="timeScale" type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
                             時間單位
                             <span class="caret"></span>
@@ -101,15 +105,16 @@
                         </ul>
 
                     </div>
-                    <div class="btn-group pull-right" style="" role="group">
+                    <div class="btn-group dropup pull-right" style="" role="group">
 
                         <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
                             顯示方式
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a data-toggle="tab" href="#line">折線圖</a></li>
-                            <li><a data-toggle="tab" href="#Candlestick">蠟燭圖</a></li>
+                            <li><a data-toggle="tab" href="#lineChart">折線圖</a></li>
+                            <li><a data-toggle="tab" href="#candlestickChart">蠟燭圖</a></li>
+                            <li><a data-toggle="tab" href="#accuracyHistoryChart">準確率歷史資料</a></li>
                         </ul>
                     </div>
                 </div>

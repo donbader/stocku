@@ -484,7 +484,7 @@
 						"shadowAlpha": 0
 					};
 
-					forecast_line.graphs[0].lineAlpha = 0.3;
+					forecast_line.graphs[0].lineAlpha = 0.6;
 					forecast_line.graphs[0].bulletField = "bullet";
 					rmse_line.graphs[0].hidden = true;
 					reg_line.graphs[0].hidden = true;
@@ -508,6 +508,20 @@
 					axis.valueAxes[0].title = "price";
 					chart.chartScrollbar.graph = candlestick.graphs[0].id;
 					this.add(candlestick, axis);
+					break;
+				default:
+					var line = STOCKU.LoadSettings("config/graph.line.json", type);
+					var axis = STOCKU.LoadSettings("config/valueAxis.json", type);
+					line.graphs[0].balloon = {
+						"borderThickness": 0.2,
+						"cornerRadius": 10,
+						"adjustBorderColor": false,
+						"color": "#ffffff",
+						"shadowAlpha": 0
+					};
+					axis.valueAxes[0].title = type;
+					chart.chartScrollbar.graph = line.graphs[0].id;
+					this.add(line,axis);
 					break;
 
 			}

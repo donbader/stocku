@@ -20,9 +20,6 @@ router.get('/stockid', function(req, res){
 	res.sendFile(path.join(__dirname, '../', 'stockid.html'));
 });
 
-router.get('/test', function(req, res){
-	res.sendFile(path.join(__dirname, '../', 'test.html'));
-});
 
 
 

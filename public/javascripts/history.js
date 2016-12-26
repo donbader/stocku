@@ -9,6 +9,7 @@
  **************************************************/
 var lineChart = new STOCKU.Chart("lineChartDiv", "line");
 var candlestickChart = new STOCKU.Chart("candlestickChartDiv","candlestick");
+var accuracyHistoryChart = new STOCKU.Chart("accuracyHistoryDiv", "accuracy");
 var searcherblock = new STOCKU.SearcherWithDate("searcherdiv");
 var idtable = STOCKU.LoadSettings("tables/idtable.json");
 
@@ -186,6 +187,26 @@ $("#timeScale").on("modify",function(event, val){
 
 });
 
+$("a[href='#accuracyHistoryChart']").on("click",function(){
+    //get history
+    $.get("/StockData/AccuracyHistory",{
+        stock:searcherblock.$.input.val()
+    })
+    .done((response)=>{
+        if(response.msg !== "DataFound")
+            return $("#logmsg").trigger("add",["找不到預測歷史紀錄","red"]);
+        $("#logmsg").trigger("add",["找到準確率歷史資料","green"]);
+        accuracyHistoryChart.addJsonData(response.content);
+        var arr = accuracyHistoryChart.arrayData();
+        arr.forEach((element)=>{
+            element.time += " 13:30:00";
+            element.accuracy = (parseInt(element.numAcc)/parseInt(element.total)).toFixed(2);
+        });
+        accuracyHistoryChart.updateJsonFromArray();
+        accuracyHistoryChart.validateData();
+    });
+})
+
 // Override search();
 searcherblock.searcher.search = function (){
     // clear data
@@ -217,6 +238,7 @@ searcherblock.searcher.search = function (){
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
                 candlestickChart.validateData();
+                // console.log(data);
             }
         );
 }
@@ -225,8 +247,8 @@ searcherblock.searcher.search = function (){
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(1232);
-searcherblock.$.date.val("2016-11-23");
+searcherblock.$.input.val(3057);
+searcherblock.$.date.val("2016-12-23");
 searcherblock.$.button.mouseup();
 lineChart.validateData();
 // //--------------------------------------------------
