@@ -1,5 +1,5 @@
 var margin = {top: 20, right: 20, bottom: 40, left: 40},
-    width = 1366 - margin.left - margin.right,
+    width = 700 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var formatPercent = d3.format(".0%");
@@ -60,7 +60,7 @@ var maketsv = function(error, data) {
 
   var sortTimeout = setTimeout(function() {
     d3.select("input").property("checked", true).each(change);
-  }, 2000);
+  }, 10);
 
   function change() {
     clearTimeout(sortTimeout);
@@ -91,6 +91,7 @@ var maketsv = function(error, data) {
 
 /* init */
 var sel_date = $('#sel_date');
+var img_dist = $('#distribution');
 sel_date.change(function(){
 	d3.select("body").select("div#rank").select("svg").remove()
 	
@@ -102,8 +103,10 @@ sel_date.change(function(){
 	var accur_data = "accur/" + sel_date.val().split('-')[0] + sel_date.val().split('-')[1] + sel_date.val().split('-')[2] + "_accur_data.tsv";
 	console.log(accur_data);
 	d3.tsv(accur_data,maketsv);
-
+  img_dist.attr("src","images/dist/" + sel_date.val().split('-')[0] + sel_date.val().split('-')[1] + sel_date.val().split('-')[2] + "_dist.png");
 });
 
+
 sel_date.val("2016-12-20");
+img_dist.attr("src","images/dist/20161220_dist.png");
 d3.tsv("accur/20161220_accur_data.tsv",maketsv);
