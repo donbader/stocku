@@ -3,12 +3,13 @@
 
 <head>
     <title>Stocku</title>
-    <meta name="robots" content="noindex" />
+    <meta name="robots" content="noindex" charset="utf-8" />
     <!-- Styles -->
     <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/rank.css" />
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/elegant-font/code/style.css">
-    <link rel="stylesheet" href="stylesheets/chart.css">
+    <!-- <link rel="stylesheet" href="stylesheets/chart.css"> -->
     <link rel="stylesheet" href="stylesheets/style.css">
     <!-- <link rel="stylesheet" href="assets/css/magnific-popup.css"> -->
     <!-- <link rel="stylesheet" href="assets/css/form-elements.css"> -->
@@ -21,6 +22,7 @@
     <script src="assets/amcharts/themes/light.js"></script>
     <script src="assets/jquery-3.1.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<script src="assets/d3.v3.min.js"></script>
 </head>
 
 <body>
@@ -31,7 +33,7 @@
             </div>
             <div class="collapse navbar-collapse" id="top-navbar-1">
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="active">
+                    <li>
                         <a href="Home"><span aria-hidden="true" class="icon_house"></span><br>Home</a>
                     </li>
                     <li>
@@ -40,7 +42,7 @@
                     <li>
                         <a href="history"><span aria-hidden="true" class="icon_documents"></span><br>歷史紀錄</a>
                     </li>
-                    <li>
+					<li class="active">
                         <a href="ranks"><span aria-hidden="true" class="icon_documents"></span><br>準確度排名</a>
                     </li>
                 </ul>
@@ -50,79 +52,27 @@
     <!-- 推薦股票 -->
     <div class="block-3-container section-container what-we-do-container">
         <div class="container">
-            <div class="row">
-                <h2>今日推薦：</h2>
-            </div>
-            <div class="row">
-                <div class="tab-content col-sm-9">
-                    <!-- 實際資訊 -->
-                    <div class="btn-group pull-left" role="group">
-                        <button id="stockNameMsg" type="button" class="btn btn-default btn-lg" title="股票名稱">股票名稱</button>
-                        <button id="closeMsg" type="button" class="btn btn-default btn-lg" title="收盤價">收盤價</button>
-                        <button id="deltaMsg" type="button" class="btn btn-default btn-lg" title="最近成交差" style="color:white;">+0.00</button>
-                        <button id="trendMsg" type="button" class="btn btn-default btn-lg" title="趨勢">趨勢</button>
-                    </div>
-                    <!-- 預測資訊 -->
-                    <div class="btn-group" role="group">
-                        <button id="forecastMsg" type="button" class="btn btn-default btn-lg" title="預測">預測</button>
-                        <button id="accuracyMsg" type="button" class="btn btn-default btn-lg" title="準確率">準確率</button>
-                    </div>
-
-
-                    <div class="tab-pane fade in active" id="line">
-                        <div id="lineChartDiv"></div>
-                    </div>
-                    <div class="tab-pane fade" id="Candlestick">
-                        <div id="candlestickChartDiv"></div>
-                    </div>
-                    <div class="btn-group pull-right" style="" role="group">
-                        <button id="timeScale" type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
-                            時間單位
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a onclick='$("#timeScale").trigger("modify",1)'>1 Min</a></li>
-                            <li><a onclick='$("#timeScale").trigger("modify",5)'>5 Min</a></li>
-                            <li><a onclick='$("#timeScale").trigger("modify",10)'>10 Min</a></li>
-                            <li><a onclick='$("#timeScale").trigger("modify",15)'>15 Min</a></li>
-                            <li><a onclick='$("#timeScale").trigger("modify",20)'>20 Min</a></li>
-                        </ul>
-
-                    </div>
-                    <div class="btn-group pull-right" style="" role="group">
-                        <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
-                            顯示方式
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a data-toggle="tab" href="#line">折線圖</a></li>
-                            <li><a data-toggle="tab" href="#Candlestick">蠟燭圖</a></li>
-                        </ul>
-                    </div>
+		<!-- 
+	   =========================================================================================================================================
+	   -->
+            <div class="row" >
+                <div class="col-sm-6">
+                <label><input class="sorted" type="checkbox">排序資料</label>
+                <label><input id="sel_date" type="date"></label>
+                    <!-- <img id="distribution" src="images/dist/20161220_dist.png" /> -->
+                    <img id="distribution" />
                 </div>
-                <div class="col-sm-3">
-                    <div class="row orm-group text-left">
-                        <div id="legenddiv"></div>
-                        請輸入股票代碼 & 查詢日期：
-                        <div id="searcherdiv"></div>
-                        <div id="trackerdiv"></div>
-                        <div id="newsdiv"></div>
-                        狀態：
-                        <div id="logmsg"></div>
-                    </div>
+                <div id="rank" class="col-sm-3">
+                    <script src="javascripts/rank.js"></script>
 
                 </div>
             </div>
+            
+	   <!-- 
+	   =========================================================================================================================================
+	   -->
         </div>
     </div>
-    <!--     <div id="controlbox">
-<input id="searcher" type="search" placeholder="3301 (大立光)" onkeydown="search(event)">
-<p id="searchermsg"></p>
-<input id="tracker" type="checkbox" checked="true">追蹤最近
-<input id="trackerInterval" type="number" placeholder="interval" value="100">min.
-</div>
--->
-    <!-- <div id="chartdiv"></div> -->
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -177,8 +127,6 @@
         $('#' + target).addClass('in active');
     });
     </script>
-    <script src="javascripts/stocku.js"></script>
-    <script src="javascripts/home.js"></script>
 </body>
 
 </html>
