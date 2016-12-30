@@ -180,7 +180,16 @@
             </div>
         </div>
     </footer>
-
+    <script type="text/javascript">
+    // Bootstrap dropdown bug
+    $('a[data-toggle="tab"]').on('click', function(e) {
+        var target = this.href.split("#")[1];
+        $('.dropdown-menu li.active').removeClass('active');
+        $('.tab-pane.fade.in.active').removeClass('in active');
+        $(this).parent('li').addClass('active');
+        $('#' + target).addClass('in active');
+    });
+    </script>
 </body>
 
 </html>

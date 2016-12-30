@@ -150,8 +150,8 @@
 		calcAccuracy: function(prevData, currData) {
 			if (prevData === undefined || currData === undefined || currData.price === undefined || currData.forecast === undefined || prevData.price === undefined)
 				return;
-			var hit_acc = prevData["hit_acc"] || 0;
-			var hit_acc_size = prevData["hit_acc_size"] || 0;
+			var numAcc = prevData["numAcc"] || 0;
+			var total = prevData["total"] || 0;
 
 			var bias_forecast = parseFloat(currData["forecast"]) - parseFloat(prevData["price"]);
 			var bias_price = parseFloat(currData["price"]) - parseFloat(prevData["price"]);
@@ -163,27 +163,32 @@
 			// ( if price is not changed, then return prevData's accuracy)
 			if(bias_price == 0){
 				return {
-					hit_acc: hit_acc,
-					hit_acc_size: hit_acc_size,
-					accuracy: parseFloat(((hit_acc / hit_acc_size).toFixed(2)))
+					numAcc: numAcc,
+					total: total,
+					accuracy: parseFloat(((numAcc / total).toFixed(2)))
 				}
 			}
 			else if (bias_forecast != 0 && bias_price != 0) {
-				bias_forecast * bias_price > 0 ? ++hit_acc : 0;
+				bias_forecast * bias_price > 0 ? ++numAcc : 0;
 			} else if (bias_forecast == bias_price) {
-				++hit_acc;
+				++numAcc;
 			}
-			++hit_acc_size;
+			++total;
 
 			return {
-				hit_acc: hit_acc,
-				hit_acc_size: hit_acc_size,
-				accuracy: parseFloat(((hit_acc / hit_acc_size).toFixed(2)))
+				numAcc: numAcc,
+				total: total,
+				accuracy: parseFloat(((numAcc / total).toFixed(2)))
 			}
 
 		},
-		addAccuracy: function(arr) {
+		addAccuracy: function(arr, base) {
 			var accuracySoFar;
+			if(base){
+				var object = STOCKU.calcAccuracy(base, arr[0]);
+				STOCKU.ObjectCombine(arr[0],object);
+			}
+
 			for (var i = 1; i < arr.length; ++i) {
 				if (arr[i].accuracy === undefined){
 					var object = STOCKU.calcAccuracy(arr[i - 1], arr[i]);
@@ -390,7 +395,7 @@
 		/**************************************************
 		 *              CHART                             *
 		 **************************************************/
-		Chart: function(id, type) {
+		Chart: function(id, type, dateFormat) {
 			// generate random id
 			var randNum = new Date().getTime() % 1000;
 			var chartID = 'chart' + randNum;
@@ -521,6 +526,8 @@
 					};
 					axis.valueAxes[0].title = type;
 					chart.chartScrollbar.graph = line.graphs[0].id;
+					chart.dataDateFormat = dateFormat || chart.dataDateFormat;
+
 					this.add(line,axis);
 					break;
 
@@ -530,7 +537,7 @@
 		Searcher: function(divId) {
 			var scope = this;
 			this.$ = {};
-			this.state = {price: {}, forecast:{}};
+			this.state = {price: {}, forecast:{}, accuracy:{}};
 			var input = this.$.input = $('<input class="stocku" type="search" placeholder="股票代碼">');
 			var button = this.$.button = $('<input class="stocku" type="button">');
 			$('#' + divId).append(input);
@@ -560,7 +567,7 @@
 		SearcherWithDate: function(divId) {
 			var scope = this;
 			this.$ = {};
-			this.state = {price: {}, forecast:{}};
+			this.state = {price: {}, forecast:{},accuracy:{}};
 
 			var searcher = this.searcher = new STOCKU.Searcher(divId);
 			this.$.input = searcher.$.input;

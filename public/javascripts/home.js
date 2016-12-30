@@ -140,7 +140,7 @@ function genNewData (){
 
 
     $("#timeScale").trigger('modify',timeScale);
-
+    console.log(lineChart.dataDateFormat);
     lineChart.validateData();
     candlestickChart.validateData();
     tracker.track();

@@ -104,6 +104,7 @@ router.get('/AccuracyHistory',function(req,res){
             })
             return;
         }
+
         res.send({
             msg: 'DataFound',
             stock: stock,
