@@ -148,30 +148,32 @@
 			return newArr;
 		},
 		calcAccuracy: function(prevData, currData) {
-			if (prevData === undefined || currData === undefined || currData.price === undefined || currData.forecast === undefined || prevData.price === undefined)
+			if (prevData === undefined || currData === undefined || currData.price === undefined || currData.forecast === undefined || prevData.price === undefined){
+				if(prevData["numAcc"] && prevData["total"]){
+					var numAcc = parseInt(prevData["numAcc"]) || 0;
+					var total = parseInt(prevData["total"]) || 0;
+					return {
+						numAcc:numAcc,
+						total:total,
+						accuracy:parseFloat(((numAcc / total).toFixed(2)))
+					}
+				}
 				return;
-			var numAcc = prevData["numAcc"] || 0;
-			var total = prevData["total"] || 0;
+			}
 
+			var numAcc = parseInt(prevData["numAcc"]) || 0;
+			var total = parseInt(prevData["total"]) || 0;
 			var bias_forecast = parseFloat(currData["forecast"]) - parseFloat(prevData["price"]);
 			var bias_price = parseFloat(currData["price"]) - parseFloat(prevData["price"]);
 
-			if (typeof bias_forecast !== 'number' || typeof bias_price !== 'number') {
-				return {};
-			}
-			// This is an extra condition
-			// ( if price is not changed, then return prevData's accuracy)
-			if(bias_price == 0){
-				return {
-					numAcc: numAcc,
-					total: total,
-					accuracy: parseFloat(((numAcc / total).toFixed(2)))
-				}
-			}
-			else if (bias_forecast != 0 && bias_price != 0) {
+
+			if (bias_forecast != 0 && bias_price != 0) {
 				bias_forecast * bias_price > 0 ? ++numAcc : 0;
 			} else if (bias_forecast == bias_price) {
 				++numAcc;
+			}
+			else if(bias_price == 0){
+				--total;
 			}
 			++total;
 
@@ -186,12 +188,13 @@
 			var accuracySoFar;
 			if(base){
 				var object = STOCKU.calcAccuracy(base, arr[0]);
-				STOCKU.ObjectCombine(arr[0],object);
+				STOCKU.ObjectCombine(arr[0], object);
 			}
 
 			for (var i = 1; i < arr.length; ++i) {
 				if (arr[i].accuracy === undefined){
 					var object = STOCKU.calcAccuracy(arr[i - 1], arr[i]);
+					// console.log(arr[i].time,object);
 					if(object){
 						STOCKU.ObjectCombine(arr[i], object);
 						accuracySoFar = object.accuracy;
@@ -200,53 +203,64 @@
 			}
 			return accuracySoFar;
 		},
-		addRMSE: function(data) {
+		trimData: function(arr){
+			arr.forEach((element)=>{
+				if(!(element.price && parseInt(element.price))){
+					delete element.price;
+				}
+				if(!(element.forecast && parseInt(element.forecast))){
+					delete element.forecast;
+				}
+			});
+			return arr;
+		},
+		addRMSE: function(arr) {
 			var size = 0;
 			var square = 0;
-			data[0].rmse_acc_size = size;
-			data[0].rmse_acc_square = square;
-			for (var i = 1; i < data.length; ++i) {
-				if (data[i].price === undefined || data[i].forecast === undefined) {
-					data[i].rmse_acc_size = size;
-					data[i].rmse_acc_square = square;
+			arr[0].rmse_acc_size = size;
+			arr[0].rmse_acc_square = square;
+			for (var i = 1; i < arr.length; ++i) {
+				if (arr[i].price === undefined || arr[i].forecast === undefined) {
+					arr[i].rmse_acc_size = size;
+					arr[i].rmse_acc_square = square;
 					continue;
 				}
-				data[i].rmse_acc_square = data[i - 1].rmse_acc_square;
-				data[i].rmse_acc_size = data[i - 1].rmse_acc_size;
+				arr[i].rmse_acc_square = arr[i - 1].rmse_acc_square;
+				arr[i].rmse_acc_size = arr[i - 1].rmse_acc_size;
 				// console.log(i);
-				// console.log(data[i-1].rmse_acc_square);
-				data[i].rmse_acc_square += Math.pow(data[i].price - data[i].forecast, 2);
-				data[i].rmse_acc_size += 1;
-				data[i].rmse = Math.sqrt(data[i].rmse_acc_square / data[i].rmse_acc_size).toFixed(2);
+				// console.log(arr[i-1].rmse_acc_square);
+				arr[i].rmse_acc_square += Math.pow(arr[i].price - arr[i].forecast, 2);
+				arr[i].rmse_acc_size += 1;
+				arr[i].rmse = Math.sqrt(arr[i].rmse_acc_square / arr[i].rmse_acc_size).toFixed(2);
 
-				square = data[i].rmse_acc_square;
-				size = data[i].rmse_acc_size;
+				square = arr[i].rmse_acc_square;
+				size = arr[i].rmse_acc_size;
 			}
 		},
-		ToOhlc: function(arrData, interval, scale) {
+		ToOhlc: function(arr, interval, scale) {
 			interval = interval || 5;
 			scale = scale || "min";
-			var firstIndex = STOCKU.getLastElementAppear(arrData, "price",true).index;
-			var startTime = new Date(arrData[firstIndex].time);
+			var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
+			var startTime = new Date(arr[firstIndex].time);
 			var nextTime = new Date(startTime).plus(interval, scale);
 			var ohlc;
 			var ohlcs = [];
-			for (var i = firstIndex; i < arrData.length; ++i) {
-				if(!arrData[i].price)continue;
-				var time = new Date(arrData[i].time).getTime();
+			for (var i = firstIndex; i < arr.length; ++i) {
+				if(!arr[i].price)continue;
+				var time = new Date(arr[i].time).getTime();
 				// console.log("time",new Date(time));
 				if(time == startTime.getTime()){
 					ohlcs.push({time: startTime.yyyymmddHHMMSS()});
 					ohlc = ohlcs[ohlcs.length - 1];
 					ohlc.open = ohlc.high = ohlc.low = ohlc.close
-						= arrData[i].price;
+						= arr[i].price;
 				}
 				else if (time > startTime.getTime() && time <= nextTime.getTime()){
-					if(arrData[i].price > ohlc.high)
-						ohlc.high = arrData[i].price;
-					else if(arrData[i].price < ohlc.low )
-						ohlc.low = arrData[i].price;
-					ohlc.close = arrData[i].price;
+					if(arr[i].price > ohlc.high)
+						ohlc.high = arr[i].price;
+					else if(arr[i].price < ohlc.low )
+						ohlc.low = arr[i].price;
+					ohlc.close = arr[i].price;
 
 					// identify the meaning of this candlestick
 					ohlc.meaning = giveCandleStickMeaning(ohlc);
@@ -421,8 +435,8 @@
 				this.prevStartTime = chart.startDate;
 				this.prevEndTime = chart.endDate;
 				STOCKU.mergeJson(this.jsonData, data);
-				var arr = chart.dataProvider;
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
+				STOCKU.trimData(chart.dataProvider);
 				chart.dataProvider.sort((a, b) => new Date(a.time) < new Date(b.time) ? -1 : 1);
 				chart.dataProvider[chart.dataProvider.length - 1].bullet = "round";
 

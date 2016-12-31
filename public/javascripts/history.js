@@ -124,26 +124,6 @@ function getAccuracy(stock){
 }
 
 
-function genNewData() {
-    var arr = lineChart.arrayData();
-    var currTime = new Date(arr[arr.length - 1].time);
-    var nextTime = new Date(currTime);
-    nextTime.setMinutes(currTime.getMinutes() + 1);
-
-    var currPrice = STOCKU.randomDatum(arr[arr.length - 2].price, 5);
-    var nextForecast = STOCKU.randomDatum(currPrice, 5);
-
-    arr[arr.length - 1].price = currPrice;
-    var nextData = {
-        time: nextTime,
-        forecast: nextForecast
-    };
-    arr.push(nextData);
-
-    STOCKU.addRMSE(arr);
-    lineChart.validateData();
-}
-
 
 /**************************************************
  *              DEBUG FUNCTION                    *
@@ -186,24 +166,38 @@ $("#deltaMsg").on("update", function() {
     this.style["background-color"] = delta >= 0 ? "red" : "green";
 });
 
-$("#trendMsg").on("update", function(event, slope) {
-    slope = slope || 0;
+$("#trendMsg").on("update", function(event) {
+    var slope = STOCKU.TrendLine(lineChart.arrayData());
     this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "(" + slope.toFixed(2) + ")";
     this.style.color = slope > 0 ? "red" : slope < 0 ? "green" : "gray";
 });
 
 
-$("#accuracyMsg").on("update", function(event, val) {
-    val *= 100;
+$("#accuracyMsg").on("update", function(event, today) {
+    var arr = accuracyHistoryChart.arrayData();
+    arr.forEach((element) => {
+        element.accuracy = (parseInt(element.numAcc) / parseInt(element.total)).toFixed(2);
+    });
+
+    var yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    var prevData = accuracyHistoryChart.jsonData[yesterday.yyyymmdd()];
+    if(!prevData){ // if yesterday is Sunday
+        yesterday.setDate(yesterday.getDate() - 2);
+        prevData = accuracyHistoryChart.jsonData[yesterday.yyyymmdd()];
+    }
+    var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData(), prevData);
+    accuracySoFar *= 100;
     var bgcolor;
     switch (true) {
-        case val < 60:
+        case accuracySoFar < 60:
             bgcolor = "rgba(0, 0, 0, 0.5)";
             break;
-        case val < 70:
+        case accuracySoFar < 70:
             bgcolor = "rgba(255,0, 0, 0.5)";
             break;
-        case val <= 80:
+        case accuracySoFar <= 80:
             bgcolor = "rgba(255, 125, 0, 0.5)";
             break;
         default:
@@ -212,7 +206,7 @@ $("#accuracyMsg").on("update", function(event, val) {
     }
     this.style["background-color"] = bgcolor;
     this.style.color = "white";
-    this.innerHTML = val.toFixed(2) + "%";
+    this.innerHTML = accuracySoFar.toFixed(2) + "%";
 });
 
 $("#timeScale").on("modify", function(event, val) {
@@ -252,9 +246,7 @@ searcherblock.searcher.search = function() {
                 lineChart.addJsonData(data);
                 STOCKU.addRMSE(lineChart.arrayData());
 
-                var slope = STOCKU.TrendLine(lineChart.arrayData());
-                $("#trendMsg").trigger("update", slope);
-
+                $("#trendMsg").trigger("update");
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
                 candlestickChart.validateData();
@@ -266,17 +258,9 @@ searcherblock.searcher.search = function() {
                 if(searcherblock.state.accuracy.stock !== stock)
                     accuracyHistoryChart.jsonData = {};
                 accuracyHistoryChart.addJsonData(data);
-                var arr = accuracyHistoryChart.arrayData();
 
-                var prevData = arr[arr.length - 1];
+                $("#accuracyMsg").trigger("update", date);
 
-                var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData(), prevData);
-                $("#accuracyMsg").trigger("update", accuracySoFar);
-
-                arr.forEach((element) => {
-                    element.accuracy = (parseInt(element.numAcc) / parseInt(element.total)).toFixed(2);
-                });
-                accuracyHistoryChart.updateJsonFromArray();
                 accuracyHistoryChart.validateData();
             }
         );
