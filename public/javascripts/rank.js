@@ -106,6 +106,9 @@ sel_date.change(function(){
   img_dist.attr("src","images/dist/" + sel_date.val().split('-')[0] + sel_date.val().split('-')[1] + sel_date.val().split('-')[2] + "_dist.png");
 });
 
+$("img#distribution").on("error", function(){
+        $(this).attr('src', 'images/market_closed.jpeg');
+});
 
 sel_date.val("2016-12-20");
 img_dist.attr("src","images/dist/20161220_dist.png");
