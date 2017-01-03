@@ -24,49 +24,55 @@ var updateTime = new Date();
 
 /* GET stock data page. */
 router.get('/price', function(req, res) {
-    process.stdout.write("[GET] 'StockData/price'   \t");
-    console.log(req.query);
+    console.log("[GET] 'StockData/price'");
     var date = req.query.date.split('-').join('');
     var stock = req.query.stock;
     var lastTimeUpdate = req.query.lastTimeUpdate;
     var file_path = 'database/price/' + date + '_' + stock + '.csv';
-    fs.readFile(file_path, 'utf-8', (err, data) => {
-        if (err) return DataNotFoundMsg(res,err);
+    fs.stat(file_path, (err,stats)=>{
+        var updateTime = new Date(stats.mtime);
 
-        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime() && (new Date()).getTime() > updateTime.getTime())) {
-            res.send({
-                msg: 'DataFound',
-                stock: stock,
-                date: date,
-                content: parseCSVToJSON(data)
+        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime())) {
+            fs.readFile(file_path, 'utf-8', (err, data) => {
+                if (err) return DataNotFoundMsg(res,err);
+                    res.send({
+                        msg: 'DataFound',
+                        stock: stock,
+                        date: date,
+                        content: parseCSVToJSON(data)
+                    });
             });
-        } else {
+        }
+        else{
             res.send({
                 msg: 'AlreadyUpdate'
             });
         }
-
     });
 });
 
 
 router.get('/forecast', function(req, res) {
-    process.stdout.write("[GET] 'StockData/forecast'\t");
-    console.log(req.query);
+    console.log("[GET] 'StockData/forecast'");
     var date = req.query.date.split('-').join('');
     var stock = req.query.stock;
     var lastTimeUpdate = req.query.lastTimeUpdate;
     var file_path = 'database/forecast/' + date + '_' + stock + '.fc.csv';
-    fs.readFile(file_path, 'utf-8', (err, data) => {
-        if (err) return DataNotFoundMsg(res,err);
-        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime() && (new Date()).getTime() > updateTime.getTime())) {
-            res.send({
-                msg: 'DataFound',
-                stock: stock,
-                date: date,
-                content: parseCSVToJSON(data)
+    fs.stat(file_path, (err,stats)=>{
+        var updateTime = new Date(stats.mtime);
+
+        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime())) {
+            fs.readFile(file_path, 'utf-8', (err, data) => {
+                if (err) return DataNotFoundMsg(res,err);
+                    res.send({
+                        msg: 'DataFound',
+                        stock: stock,
+                        date: date,
+                        content: parseCSVToJSON(data)
+                    });
             });
-        } else {
+        }
+        else{
             res.send({
                 msg: 'AlreadyUpdate'
             });
@@ -90,16 +96,27 @@ router.get('/News', function(req, res) {
 
 router.get('/AccuracyHistory',function(req,res){
     var stock = req.query.stock;
+    var lastTimeUpdate = req.query.lastTimeUpdate;
     var file_path = 'database/accuracy/acc_' + stock + '.csv';
 
-    fs.readFile(file_path,'utf-8',(err,data)=>{
-        if(err || !data)return DataNotFoundMsg(res,err);
+    fs.stat(file_path, (err,stats)=>{
+        var updateTime = new Date(stats.mtime);
 
-        res.send({
-            msg: 'DataFound',
-            stock: stock,
-            content: parseCSVToJSON(data)
-        });
+        if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime())) {
+            fs.readFile(file_path, 'utf-8', (err, data) => {
+                if (err) return DataNotFoundMsg(res,err);
+                    res.send({
+                        msg: 'DataFound',
+                        stock: stock,
+                        content: parseCSVToJSON(data)
+                    });
+            });
+        }
+        else{
+            res.send({
+                msg: 'AlreadyUpdate'
+            });
+        }
     });
 });
 

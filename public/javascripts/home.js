@@ -24,7 +24,7 @@ STOCKU.FetchNews();
  *              GLOBAL FUNCTION                   *
  **************************************************/
  function getPrice(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.price) ?
+     var lastTimeUpdate = (stock == searcherblock.state.price.stock) ?
                             searcherblock.state.price.updateTime : undefined;
      log("Getting Price...");
      return new Promise((resolve, reject) => {
@@ -63,7 +63,7 @@ STOCKU.FetchNews();
 
 
  function getForecast(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.forecast) ?
+     var lastTimeUpdate = (stock == searcherblock.state.forecast.stock) ?
                             searcherblock.state.forecast.updateTime : undefined;
 
      log("Getting Forecast...");
@@ -101,10 +101,14 @@ STOCKU.FetchNews();
      });
  }
  function getAccuracy(stock){
+     var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
+                            searcherblock.state.accuracy.updateTime : undefined;
+
     log("Getting Accuracy...");
     return new Promise((resolve, reject) => {
         $.get("/StockData/AccuracyHistory", {
-            stock: stock
+            stock: stock,
+            lastTimeUpdate: lastTimeUpdate
         })
         .done((response) => {
             if (response.msg == "DataFound") {
@@ -209,15 +213,15 @@ function log(msg, debug = true) {
  *              DEPLOY EVENT                      *
  **************************************************/
 
-$("#logmsg").on("set", function(event, msg, color) {
-    var msg = '<div style="color:' + color + '">' + msg + '</div>'
-    this.innerHTML = msg;
-})
+// $("#logmsg").on("set", function(event, msg, color) {
+//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
+//     this.innerHTML = msg;
+// })
 
-$("#logmsg").on("add", function(event, msg, color) {
-    var msg = '<div style="color:' + color + '">' + msg + '</div>'
-    this.innerHTML = this.innerHTML + "<br>" + msg;
-});
+// $("#logmsg").on("add", function(event, msg, color) {
+//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
+//     this.innerHTML = this.innerHTML + "<br>" + msg;
+// });
 $("#stockNameMsg").on("update", function(){
     var stockNum = searcherblock.$.input.val();
     this.innerHTML = stockNum ? idtable[stockNum] : "隨機";
@@ -341,7 +345,8 @@ searcherblock.search = function (){
                 $("#accuracyMsg").trigger("update", date);
 
                 accuracyHistoryChart.validateData();
-            }
+            },
+            (response) => {}
         );
 }
 
