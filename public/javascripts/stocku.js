@@ -50,7 +50,8 @@
 						break;
 				}
 				return this;
-			}
+			};
+
 
 		},
 		/**************************************************
@@ -214,6 +215,15 @@
 				}
 			});
 			return arr;
+		},
+		findKeyByValue: function(obj,value){
+		    for( var prop in obj ) {
+		        if( obj.hasOwnProperty( prop ) ) {
+		             if( obj[ prop ] === value )
+		                 return prop;
+		        }
+		    }
+		    return -1;
 		},
 		addRMSE: function(arr) {
 			var size = 0;

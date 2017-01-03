@@ -123,6 +123,20 @@ function getAccuracy(stock){
     });
 }
 
+function getRank(){
+    return new Promise((resolve, reject)=>{
+        $.get("/StockData/Rank")
+        .done((response)=>{
+            if(response.msg == "DataFound"){
+                recommendStock = STOCKU.findKeyByValue(idtable, response.content.stock);
+                searcherblock.$.input.val(recommendStock);
+            }
+            searcherblock.$.button.mouseup();
+        });
+
+    });
+}
+
 
 
 /**************************************************
@@ -265,10 +279,12 @@ searcherblock.searcher.search = function() {
  *              MAIN                              *
  **************************************************/
 // set up searcher block
-searcherblock.$.input.val(3057);
-searcherblock.$.date.val("2016-12-23");
-searcherblock.$.button.mouseup();
-lineChart.validateData();
+getRank();
+
+// searcherblock.$.input.val(3057);
+// searcherblock.$.date.val("2016-12-23");
+// searcherblock.$.button.mouseup();
+// lineChart.validateData();
 // //--------------------------------------------------
 
 // // Random Data

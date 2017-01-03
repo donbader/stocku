@@ -15,7 +15,11 @@ var accuracyHistoryChart = new STOCKU.Chart("accuracyHistoryDiv", "accuracy", "Y
 var searcherblock = new STOCKU.Searcher("searcherdiv");
 var tracker = new STOCKU.Tracker("trackerdiv");
 var idtable = STOCKU.LoadSettings("tables/idtable.json");
+var recommendStock = 2402;
 var timeScale = 1;
+
+STOCKU.FetchNews();
+
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
@@ -128,8 +132,19 @@ var timeScale = 1;
     });
 }
 
+function getRank(){
+    return new Promise((resolve, reject)=>{
+        $.get("/StockData/Rank")
+        .done((response)=>{
+            if(response.msg == "DataFound"){
+                recommendStock = STOCKU.findKeyByValue(idtable, response.content.stock);
+                searcherblock.$.input.val(recommendStock);
+            }
+            searcherblock.$.button.mouseup();
+        });
 
-
+    });
+}
 
 tracker.track = function(){
 	if(this.$.checkbox.prop("checked")){
@@ -333,34 +348,33 @@ searcherblock.search = function (){
 /**************************************************
  *              MAIN                              *
  **************************************************/
+getRank();
 // set up searcher block
-// searcherblock.$.input.val(1101);
 // tracker.$.input.val(20);
 // searcherblock.$.button.mouseup();
 //
-// var refreshId = setInterval(() => {
-//     searcherblock.search();
-// }, 3000);
+var refreshId = setInterval(() => {
+    searcherblock.search();
+}, 3000);
 //--------------------------------------------------
 
 // Random Data
-$("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
-var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
-var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
-priceData = STOCKU.ObjectCombine(priceData, forecastData);
+// $("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
+// var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
+// var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
+// priceData = STOCKU.ObjectCombine(priceData, forecastData);
 
-lineChart.addJsonData(priceData);
-STOCKU.addRMSE(lineChart.arrayData());
-candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
+// lineChart.addJsonData(priceData);
+// STOCKU.addRMSE(lineChart.arrayData());
+// candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
 
 
-STOCKU.TrendLine(lineChart.arrayData());
+// STOCKU.TrendLine(lineChart.arrayData());
 
 // var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
 // $("#logmsg").trigger("add", ["準確率: " + accuracySoFar, "green"]);
-STOCKU.FetchNews();
-$("#stockNameMsg").trigger("update");
-$("#deltaMsg").trigger("update");
+// $("#stockNameMsg").trigger("update");
+// $("#deltaMsg").trigger("update");
 
 // set Interval
 // var refreshId = setInterval(() => {
