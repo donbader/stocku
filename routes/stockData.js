@@ -24,12 +24,13 @@ var updateTime = new Date();
 
 /* GET stock data page. */
 router.get('/price', function(req, res) {
-    console.log("[GET] 'StockData/price'");
+    console.log("[GET] 'StockData/price'", req.query);
     var date = req.query.date.split('-').join('');
     var stock = req.query.stock;
     var lastTimeUpdate = req.query.lastTimeUpdate;
     var file_path = 'database/price/' + date + '_' + stock + '.csv';
     fs.stat(file_path, (err,stats)=>{
+        if(!stats) return DataNotFoundMsg(res,err);
         var updateTime = new Date(stats.mtime);
 
         if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime())) {
@@ -53,12 +54,14 @@ router.get('/price', function(req, res) {
 
 
 router.get('/forecast', function(req, res) {
-    console.log("[GET] 'StockData/forecast'");
+    console.log("[GET] 'StockData/forecast'", req.query);
     var date = req.query.date.split('-').join('');
     var stock = req.query.stock;
     var lastTimeUpdate = req.query.lastTimeUpdate;
     var file_path = 'database/forecast/' + date + '_' + stock + '.fc.csv';
     fs.stat(file_path, (err,stats)=>{
+        if(!stats) return DataNotFoundMsg(res,err);
+
         var updateTime = new Date(stats.mtime);
 
         if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime())) {
@@ -100,6 +103,7 @@ router.get('/AccuracyHistory',function(req,res){
     var file_path = 'database/accuracy/acc_' + stock + '.csv';
 
     fs.stat(file_path, (err,stats)=>{
+        if(!stats) return DataNotFoundMsg(res,err);
         var updateTime = new Date(stats.mtime);
 
         if (!lastTimeUpdate || (Number(lastTimeUpdate) < updateTime.getTime())) {
@@ -125,6 +129,7 @@ router.get('/Rank', function(req,res){
     rank_num = rank_num <=0 ? 1 : rank_num;
     fs.readFile('public/accur/LatestData', 'utf-8', (err,file_path)=>{
         if(err || !file_path)return DataNotFoundMsg(res,err);
+        file_path = file_path.split('\n')[0];
         fs.readFile('public/accur/'+file_path, 'utf-8', (err,data)=>{
             if (err||!data) return DataNotFoundMsg(res,err);
             res.send({
