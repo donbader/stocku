@@ -172,9 +172,10 @@
 			} else if (bias_forecast == bias_price) {
 				++numAcc;
 			}
-			else if(bias_price == 0){
-				--total;
-			}
+			// extra case :
+			// else if(bias_price == 0){
+			// 	--total;
+			// }
 			++total;
 
 			return {
