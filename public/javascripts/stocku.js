@@ -300,7 +300,7 @@
 			return a;
 		},
 		getLastElementAppear: function(arr, elementName, reverse) {
-			if (arr === undefined) return;
+			if (arr === undefined || !arr.length) return {element: {}, index: undefined};
 			if(!reverse){
 				for (var i = arr.length - 1; i >= 0; --i) {
 					if (arr[i] !== undefined && arr[i][elementName] !== undefined) {
@@ -315,6 +315,15 @@
 					}
 				}
 			}
+			return {element: {}, index: undefined};
+		},
+		findPrevData: function(arr, today){
+			for(var i = arr.length - 1; i >= 0 ; --i){
+				var time = new Date(arr[i].time);
+				if(today > time) break;
+			}
+			if(i === -1)return;
+			return arr[i];
 		},
 		FetchNews: function(){
 			console.log("Fetching News...");

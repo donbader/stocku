@@ -179,14 +179,9 @@ $("#accuracyMsg").on("update", function(event, today) {
         element.accuracy = (parseInt(element.numAcc) / parseInt(element.total)).toFixed(2);
     });
 
-    var yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    today = new Date(today);
+    var prevData = STOCKU.findPrevData(accuracyHistoryChart.arrayData(), today);
 
-    var prevData = accuracyHistoryChart.jsonData[yesterday.yyyymmdd()];
-    if(!prevData){ // if yesterday is Sunday
-        yesterday.setDate(yesterday.getDate() - 2);
-        prevData = accuracyHistoryChart.jsonData[yesterday.yyyymmdd()];
-    }
     var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData(), prevData);
     accuracySoFar *= 100;
     var bgcolor;

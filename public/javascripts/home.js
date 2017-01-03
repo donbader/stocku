@@ -232,7 +232,10 @@ $("#forecastMsg").on("update", function(event){
     var delta = forecast - price;
     this.style.color = "white";
     this.style["background-color"] = ( delta > 0) ? "rgba(0, 125, 0, 0.5)" : (delta < 0 ) ? "rgba(255,0, 0, 0.5)" : "gray";
-    this.innerHTML = ( delta > 0) ? "可買進" : (delta < 0 ) ? "可賣出" : "持有";
+    this.innerHTML = (delta > 0) ? "可買進"
+                    :(delta < 0 ) ? "可賣出"
+                    : (delta == 0) ? "持有"
+                    : "無法預測";
 });
 
 
@@ -242,14 +245,9 @@ $("#accuracyMsg").on("update", function(event, today) {
         element.accuracy = (parseInt(element.numAcc) / parseInt(element.total)).toFixed(2);
     });
 
-    var yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    today = new Date(today);
+    var prevData = STOCKU.findPrevData(accuracyHistoryChart.arrayData(), today);
 
-    var prevData = accuracyHistoryChart.jsonData[yesterday.yyyymmdd()];
-    if(!prevData){ // if yesterday is Sunday
-        yesterday.setDate(yesterday.getDate() - 2);
-        prevData = accuracyHistoryChart.jsonData[yesterday.yyyymmdd()];
-    }
     var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData(), prevData);
     accuracySoFar *= 100;
     var bgcolor;
@@ -310,12 +308,14 @@ searcherblock.search = function (){
                 lineChart.addJsonData(data);
                 STOCKU.addRMSE(lineChart.arrayData());
 
+                $("#forecastMsg").trigger("update");
                 $("#trendMsg").trigger("update");
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
                 candlestickChart.validateData();
                 return getAccuracy(stock);
-            }
+            },
+            (response) => getAccuracy(stock)
         )
         .then(
             (data)=> {
@@ -363,7 +363,7 @@ $("#stockNameMsg").trigger("update");
 $("#deltaMsg").trigger("update");
 
 // set Interval
-var refreshId = setInterval(() => {
-    genNewData();
-}, 3000);
+// var refreshId = setInterval(() => {
+    // genNewData();
+// }, 3000);
 //--------------------------------------------------
