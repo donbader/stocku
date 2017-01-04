@@ -26,6 +26,7 @@ STOCKU.FetchNews();
  function getPrice(stock, date) {
      var lastTimeUpdate = (stock == searcherblock.state.price.stock) ?
                             searcherblock.state.price.updateTime : undefined;
+    stock = stock || recommendStock;
      log("Getting Price...");
      return new Promise((resolve, reject) => {
          $.get("/StockData/price", {
@@ -43,7 +44,7 @@ STOCKU.FetchNews();
                      resolve(response.content);
                  }
                  else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
+                     $("#logmsg").trigger("set", ["沒有找到價錢資料("+stock+")", "red"]);
                      searcherblock.state.price = {
                          updateTime:undefined,
                          stock: stock
@@ -147,6 +148,10 @@ function getRank(){
             searcherblock.$.button.mouseup();
         });
 
+        var refreshId = setInterval(() => {
+            searcherblock.search();
+        }, 3000);
+
     });
 }
 
@@ -213,15 +218,15 @@ function log(msg, debug = true) {
  *              DEPLOY EVENT                      *
  **************************************************/
 
-// $("#logmsg").on("set", function(event, msg, color) {
-//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
-//     this.innerHTML = msg;
-// })
+$("#logmsg").on("set", function(event, msg, color) {
+    var msg = '<div style="color:' + color + '">' + msg + '</div>'
+    this.innerHTML = msg;
+})
 
-// $("#logmsg").on("add", function(event, msg, color) {
-//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
-//     this.innerHTML = this.innerHTML + "<br>" + msg;
-// });
+$("#logmsg").on("add", function(event, msg, color) {
+    var msg = '<div style="color:' + color + '">' + msg + '</div>'
+    this.innerHTML = this.innerHTML + "<br>" + msg;
+});
 $("#stockNameMsg").on("update", function(){
     var stockNum = searcherblock.$.input.val();
     this.innerHTML = stockNum ? idtable[stockNum] : "隨機";
@@ -304,20 +309,23 @@ $("#timeScale").on("modify",function(event, val){
 
 // Override search();
 searcherblock.search = function (){
-	// clear data
-	lineChart.jsonData = {};
     var stock = searcherblock.$.input.val();
     var date = new Date().yyyymmdd();
     getPrice(stock, date)
         .then(
             (data) => {
-                if(searcherblock.state.price.stock !== stock)
+                if(searcherblock.state.price.stock !== stock){
                     lineChart.jsonData = {};
+                }
                 lineChart.addJsonData(data);
                 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 1, "min"));
                 $("#stockNameMsg").trigger("update");
                 $("#deltaMsg").trigger("update");
                 $("#closeMsg").trigger("update");
+
+                lineChart.validateData();
+                candlestickChart.validateData();
+
                 return getForecast(stock, date);
             },
             (response) => getForecast(stock, date)
@@ -331,7 +339,6 @@ searcherblock.search = function (){
                 $("#trendMsg").trigger("update");
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
-                candlestickChart.validateData();
                 return getAccuracy(stock);
             },
             (response) => getAccuracy(stock)
@@ -358,9 +365,7 @@ getRank();
 // tracker.$.input.val(20);
 // searcherblock.$.button.mouseup();
 //
-var refreshId = setInterval(() => {
-    searcherblock.search();
-}, 3000);
+
 //--------------------------------------------------
 
 // Random Data

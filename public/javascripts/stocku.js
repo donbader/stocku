@@ -451,10 +451,12 @@
 			// Json data
 			this.jsonData = {};
 			this.addJsonData = function(data) {
+				// console.log("Add Json Data!!", this.jsonData, data);
 				// record old dates
 				this.prevStartTime = chart.startDate;
 				this.prevEndTime = chart.endDate;
 				STOCKU.mergeJson(this.jsonData, data);
+				// console.log("After merge, ", this.jsonData);
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
 				STOCKU.trimData(chart.dataProvider);
 				chart.dataProvider.sort((a, b) => new Date(a.time) < new Date(b.time) ? -1 : 1);
