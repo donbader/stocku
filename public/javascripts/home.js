@@ -218,15 +218,15 @@ function log(msg, debug = true) {
  *              DEPLOY EVENT                      *
  **************************************************/
 
-$("#logmsg").on("set", function(event, msg, color) {
-    var msg = '<div style="color:' + color + '">' + msg + '</div>'
-    this.innerHTML = msg;
-})
+// $("#logmsg").on("set", function(event, msg, color) {
+//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
+//     this.innerHTML = msg;
+// })
 
-$("#logmsg").on("add", function(event, msg, color) {
-    var msg = '<div style="color:' + color + '">' + msg + '</div>'
-    this.innerHTML = this.innerHTML + "<br>" + msg;
-});
+// $("#logmsg").on("add", function(event, msg, color) {
+//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
+//     this.innerHTML = this.innerHTML + "<br>" + msg;
+// });
 $("#stockNameMsg").on("update", function(){
     var stockNum = searcherblock.$.input.val();
     this.innerHTML = stockNum ? idtable[stockNum] : "隨機";
