@@ -110,6 +110,17 @@ $("img#distribution").on("error", function(){
         $(this).attr('src', 'images/market_closed.jpeg');
 });
 
-sel_date.val("2016-12-20");
-img_dist.attr("src","images/dist/20161220_dist.png");
-d3.tsv("accur/20161220_accur_data.tsv",maketsv);
+/* get current date */
+var today = new Date();
+var dd = today.getDay() + 1;
+var mm = today.getMonth() + 1;
+mm = (mm < 10) ? '0' + mm : mm;
+dd = (dd < 10) ? '0' + dd : dd;
+var yyyy = today.getFullYear();
+today = yyyy + '-' + mm + '-' + dd;
+/* fill today into datepicker */
+sel_date.val(today);
+today = yyyy + mm + dd;
+/* fill date var into other elements */
+img_dist.attr("src","images/dist/" + today + "_dist.png");
+d3.tsv("accur/" + today + "_accur_data.tsv",maketsv);
