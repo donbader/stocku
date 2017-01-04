@@ -190,7 +190,7 @@ $("#deltaMsg").on("update", function() {
 
 $("#trendMsg").on("update", function(event) {
     var slope = STOCKU.TrendLine(lineChart.arrayData());
-    this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "(" + slope.toFixed(2) + ")";
+    this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "(" + (slope*100).toFixed(2) + "%)";
     this.style.color = slope > 0 ? "red" : slope < 0 ? "green" : "gray";
 });
 
