@@ -460,7 +460,6 @@
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
 				STOCKU.trimData(chart.dataProvider);
 				chart.dataProvider.sort((a, b) => new Date(a.time) < new Date(b.time) ? -1 : 1);
-				chart.dataProvider[chart.dataProvider.length - 1].bullet = "round";
 
 			};
 			this.arrayData = function(arr, changeJson) {

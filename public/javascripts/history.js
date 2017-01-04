@@ -18,129 +18,129 @@ var idtable = STOCKU.LoadSettings("tables/idtable.json");
  *              GLOBAL FUNCTION                   *
  **************************************************/
 function getPrice(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.price.stock) ?
-                            searcherblock.state.price.updateTime : undefined;
-     log("Getting Price...");
-     return new Promise((resolve, reject) => {
-         $.get("/StockData/price", {
-                 stock: stock,
-                 date: date,
-                 lastTimeUpdate: lastTimeUpdate
-             })
-             .done((response) => {
-                 if (response.msg == "DataFound"){
-                     $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
-                     searcherblock.state.price = {
-                         updateTime:new Date().getTime(),
-                         stock: stock
-                     };
-                     resolve(response.content);
-                 }
-                 else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
-                     searcherblock.state.price = {
-                         updateTime:undefined,
-                         stock: stock
-                     };
-                     reject(response);
-                 }
-                 else{
-                     $("#logmsg").trigger("set", ["價錢資料已是最新", "blue"]);
-                     reject(response);
-                 }
-             })
-             .fail((response) => {
-                 reject(response);
-             });
-     });
- }
+    var lastTimeUpdate = (stock === searcherblock.state.price.stock) && (date === searcherblock.state.price.date) ?
+        searcherblock.state.price.updateTime : undefined;
+    log("Getting Price...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/price", {
+                stock: stock,
+                date: date,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
+                    searcherblock.state.price = {
+                        updateTime: new Date().getTime(),
+                        stock: stock,
+                        date: date
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
+                    searcherblock.state.price = {
+                        updateTime: undefined,
+                        stock: stock,
+                        date: date
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("set", ["價錢資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
 
 
- function getForecast(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.forecast.stock) ?
-                            searcherblock.state.forecast.updateTime : undefined;
+function getForecast(stock, date) {
+    var lastTimeUpdate = (stock == searcherblock.state.forecast.stock) && (date === searcherblock.state.forecast.date) ?
+        searcherblock.state.forecast.updateTime : undefined;
 
-     log("Getting Forecast...");
-     return new Promise((resolve, reject) => {
-         $.get("/StockData/forecast", {
-                 stock: stock,
-                 date: date,
-                 lastTimeUpdate: lastTimeUpdate
-             })
-             .done((response) => {
-                 if (response.msg == "DataFound"){
-                     $("#logmsg").trigger("add", ["找到預測資料", "green"]);
-                     searcherblock.state.forecast = {
-                         updateTime:new Date().getTime(),
-                         stock: stock
-                     };
-                     resolve(response.content);
-                 }
-                 else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
-                     searcherblock.state.forecast = {
-                         updateTime:undefined,
-                         stock: stock
-                     };
-                     reject(response);
-                 }
-                 else{
-                     $("#logmsg").trigger("add", ["預測資料已是最新", "blue"]);
-                     reject(response);
-                 }
-             })
-             .fail((response) => {
-                 reject(response);
-             });
-     });
- }
+    log("Getting Forecast...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/forecast", {
+                stock: stock,
+                date: date,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("add", ["找到預測資料", "green"]);
+                    searcherblock.state.forecast = {
+                        updateTime: new Date().getTime(),
+                        stock: stock,
+                        date: date
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
+                    searcherblock.state.forecast = {
+                        updateTime: undefined,
+                        stock: stock,
+                        date: date
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("add", ["預測資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
 
- function getAccuracy(stock){
-     var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
-                            searcherblock.state.accuracy.updateTime : undefined;
+function getAccuracy(stock) {
+    var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
+        searcherblock.state.accuracy.updateTime : undefined;
 
     log("Getting Accuracy...");
     return new Promise((resolve, reject) => {
         $.get("/StockData/AccuracyHistory", {
-            stock: stock,
-            lastTimeUpdate: lastTimeUpdate
-        })
-        .done((response) => {
-            if (response.msg == "DataFound") {
-                $("#logmsg").trigger("add", ["找到準確率資料", "green"]);
-                searcherblock.state.accuracy = {
-                    updateTime: new Date().getTime(),
-                    stock: stock
-                };
-                resolve(response.content);
-            } else if (response.msg == "DataNotFound") {
-                $("#logmsg").trigger("add", ["沒有找到準確率資料", "red"]);
-                searcherblock.state.accuracy = {
-                    updateTime: undefined,
-                    stock: stock
-                };
+                stock: stock,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("add", ["找到準確率資料", "green"]);
+                    searcherblock.state.accuracy = {
+                        updateTime: new Date().getTime(),
+                        stock: stock
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("add", ["沒有找到準確率資料", "red"]);
+                    searcherblock.state.accuracy = {
+                        updateTime: undefined,
+                        stock: stock
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("add", ["準確率資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
                 reject(response);
-            } else {
-                $("#logmsg").trigger("add", ["準確率資料已是最新", "blue"]);
-                reject(response);
-            }
-        })
-        .fail((response) => {
-            reject(response);
-        });
+            });
     });
 }
 
-function getRank(){
-    return new Promise((resolve, reject)=>{
+function getRank() {
+    return new Promise((resolve, reject) => {
         $.get("/StockData/Rank")
-        .done((response)=>{
-            if(response.msg == "DataFound"){
-                recommendStock = STOCKU.findKeyByValue(idtable, response.content.stock);
-                searcherblock.$.input.val(recommendStock);
-            }
-            searcherblock.$.button.mouseup();
-        });
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    recommendStock = STOCKU.findKeyByValue(idtable, response.content.stock);
+                    searcherblock.$.input.val(recommendStock);
+                }
+                searcherblock.$.button.mouseup();
+            });
 
     });
 }
@@ -162,15 +162,15 @@ function log(msg, debug = true) {
  *              DEPLOY EVENT                      *
  **************************************************/
 
-// $("#logmsg").on("set", function(event, msg, color) {
-//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
-//     this.innerHTML = msg;
-// })
+$("#logmsg").on("set", function(event, msg, color) {
+    var msg = '<div style="color:' + color + '">' + msg + '</div>'
+    this.innerHTML = msg;
+})
 
-// $("#logmsg").on("add", function(event, msg, color) {
-//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
-//     this.innerHTML = this.innerHTML + "<br>" + msg;
-// });
+$("#logmsg").on("add", function(event, msg, color) {
+    var msg = '<div style="color:' + color + '">' + msg + '</div>'
+    this.innerHTML = this.innerHTML + "<br>" + msg;
+});
 
 $("#stockNameMsg").on("update", function() {
     var stockNum = searcherblock.$.input.val();
@@ -247,13 +247,14 @@ searcherblock.searcher.search = function() {
     getPrice(stock, date)
         .then(
             (data) => {
-                if(searcherblock.state.price.stock !== stock)
-                    lineChart.jsonData = {};
                 lineChart.addJsonData(data);
                 candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 1, "min"));
                 $("#stockNameMsg").trigger("update");
                 $("#deltaMsg").trigger("update");
                 $("#closeMsg").trigger("update");
+
+                lineChart.validateData();
+                candlestickChart.validateData();
                 return getForecast(stock, date);
             },
             (response) => getForecast(stock, date)
@@ -266,13 +267,12 @@ searcherblock.searcher.search = function() {
                 $("#trendMsg").trigger("update");
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
-                candlestickChart.validateData();
                 return getAccuracy(stock);
             }
         )
         .then(
-            (data)=> {
-                if(searcherblock.state.accuracy.stock !== stock)
+            (data) => {
+                if (searcherblock.state.accuracy.stock !== stock)
                     accuracyHistoryChart.jsonData = {};
                 accuracyHistoryChart.addJsonData(data);
 
@@ -280,7 +280,7 @@ searcherblock.searcher.search = function() {
 
                 accuracyHistoryChart.validateData();
             },
-            (response)=>{}
+            (response) => {}
         );
 }
 

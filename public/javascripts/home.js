@@ -23,84 +23,120 @@ STOCKU.FetchNews();
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
- function getPrice(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.price.stock) ?
-                            searcherblock.state.price.updateTime : undefined;
-    stock = stock || recommendStock;
-     log("Getting Price...");
-     return new Promise((resolve, reject) => {
-         $.get("/StockData/price", {
-                 stock: stock,
-                 date: date,
-                 lastTimeUpdate: lastTimeUpdate
-             })
-             .done((response) => {
-                 if (response.msg == "DataFound"){
-                     $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
-                     searcherblock.state.price = {
-                         updateTime:new Date().getTime(),
-                         stock: stock
-                     };
-                     resolve(response.content);
-                 }
-                 else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("set", ["沒有找到價錢資料("+stock+")", "red"]);
-                     searcherblock.state.price = {
-                         updateTime:undefined,
-                         stock: stock
-                     };
-                     reject(response);
-                 }
-                 else{
-                     $("#logmsg").trigger("set", ["價錢資料已是最新", "blue"]);
-                     reject(response);
-                 }
-             })
-             .fail((response) => {
-                 reject(response);
-             });
-     });
- }
+function getPrice(stock, date) {
+    var lastTimeUpdate = (stock === searcherblock.state.price.stock) && (date === searcherblock.state.price.date) ?
+        searcherblock.state.price.updateTime : undefined;
+    log("Getting Price...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/price", {
+                stock: stock,
+                date: date,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
+                    searcherblock.state.price = {
+                        updateTime: new Date().getTime(),
+                        stock: stock,
+                        date: date
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
+                    searcherblock.state.price = {
+                        updateTime: undefined,
+                        stock: stock,
+                        date: date
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("set", ["價錢資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
 
 
- function getForecast(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.forecast.stock) ?
-                            searcherblock.state.forecast.updateTime : undefined;
+function getForecast(stock, date) {
+    var lastTimeUpdate = (stock == searcherblock.state.forecast.stock) && (date === searcherblock.state.forecast.date) ?
+        searcherblock.state.forecast.updateTime : undefined;
 
-     log("Getting Forecast...");
-     return new Promise((resolve, reject) => {
-         $.get("/StockData/forecast", {
-                 stock: stock,
-                 date: date,
-                 lastTimeUpdate: lastTimeUpdate
-             })
-             .done((response) => {
-                 if (response.msg == "DataFound"){
-                     $("#logmsg").trigger("add", ["找到預測資料", "green"]);
-                     searcherblock.state.forecast = {
-                         updateTime:new Date().getTime(),
-                         stock: stock
-                     };
-                     resolve(response.content);
-                 }
-                 else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
-                     searcherblock.state.forecast = {
-                         updateTime:undefined,
-                         stock: stock
-                     };
-                     reject(response);
-                 }
-                 else{
-                     $("#logmsg").trigger("add", ["預測資料已是最新", "blue"]);
-                     reject(response);
-                 }
-             })
-             .fail((response) => {
-                 reject(response);
-             });
-     });
- }
+    log("Getting Forecast...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/forecast", {
+                stock: stock,
+                date: date,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("add", ["找到預測資料", "green"]);
+                    searcherblock.state.forecast = {
+                        updateTime: new Date().getTime(),
+                        stock: stock,
+                        date: date
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
+                    searcherblock.state.forecast = {
+                        updateTime: undefined,
+                        stock: stock,
+                        date: date
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("add", ["預測資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
+
+function getAccuracy(stock) {
+    var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
+        searcherblock.state.accuracy.updateTime : undefined;
+
+    log("Getting Accuracy...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/AccuracyHistory", {
+                stock: stock,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("add", ["找到準確率資料", "green"]);
+                    searcherblock.state.accuracy = {
+                        updateTime: new Date().getTime(),
+                        stock: stock
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("add", ["沒有找到準確率資料", "red"]);
+                    searcherblock.state.accuracy = {
+                        updateTime: undefined,
+                        stock: stock
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("add", ["準確率資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
+
  function getAccuracy(stock){
      var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
                             searcherblock.state.accuracy.updateTime : undefined;
@@ -251,15 +287,25 @@ $("#trendMsg").on("update", function(event) {
 
 
 $("#forecastMsg").on("update", function(event){
-    var forecast = STOCKU.getLastElementAppear(lineChart.arrayData(), "forecast").element.forecast;
-    var price = STOCKU.getLastElementAppear(lineChart.arrayData(), "price").element.price;
-    var delta = forecast - price;
+    var arr = lineChart.arrayData();
+    var lastElements = {};
+    lastElements['bullet'] = STOCKU.getLastElementAppear(arr, "bullet").element;
+    lastElements['forecast'] = STOCKU.getLastElementAppear(arr, "forecast").element;
+    lastElements['price'] = STOCKU.getLastElementAppear(arr, "price").element;
+    // re-new bullet
+    if(lastElements['bullet'].bullet)
+        delete lastElements['bullet'].bullet;
+    lastElements['forecast'].bullet = "round";
+
+    var delta = lastElements['forecast'].forecast - lastElements['price'].price;
     this.style.color = "white";
     this.style["background-color"] = ( delta > 0) ? "rgba(0, 125, 0, 0.5)" : (delta < 0 ) ? "rgba(255,0, 0, 0.5)" : "gray";
     this.innerHTML = (delta > 0) ? "可買進"
                     :(delta < 0 ) ? "可賣出"
                     : (delta == 0) ? "持有"
                     : "無法預測";
+
+    lineChart.validateData();
 });
 
 
@@ -337,6 +383,7 @@ searcherblock.search = function (){
 
                 $("#forecastMsg").trigger("update");
                 $("#trendMsg").trigger("update");
+
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
                 return getAccuracy(stock);
