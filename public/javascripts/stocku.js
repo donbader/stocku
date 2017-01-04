@@ -411,7 +411,7 @@
 
 			// You can use this function to find first index of price
 			//var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
-			for(var i = 0,valid_count = 0;i<arr.length - 1;i++){
+			for(var i = 0,valid_count = 0;i<arr.length;i++){
 				if(arr[i]['price'] !== undefined && arr[i]['price'] !== null){
 					arr[i]['reg'] = null;
 					x[valid_count] = i;
