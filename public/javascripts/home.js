@@ -364,14 +364,14 @@ searcherblock.search = function (){
                     lineChart.jsonData = {};
                 }
                 lineChart.addJsonData(data);
-                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 1, "min"));
+                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), timeScale, "min"));
                 $("#stockNameMsg").trigger("update");
                 $("#deltaMsg").trigger("update");
                 $("#closeMsg").trigger("update");
 
                 lineChart.validateData();
                 candlestickChart.validateData();
-
+                $("#timeScale").trigger('modify',timeScale);
                 return getForecast(stock, date);
             },
             (response) => getForecast(stock, date)
@@ -386,6 +386,7 @@ searcherblock.search = function (){
 
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
+                $("#timeScale").trigger('modify',timeScale);
                 return getAccuracy(stock);
             },
             (response) => getAccuracy(stock)

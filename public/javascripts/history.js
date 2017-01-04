@@ -255,6 +255,7 @@ searcherblock.searcher.search = function() {
 
                 lineChart.validateData();
                 candlestickChart.validateData();
+                $("#timeScale").trigger('modify',timeScale);
                 return getForecast(stock, date);
             },
             (response) => getForecast(stock, date)
@@ -267,6 +268,7 @@ searcherblock.searcher.search = function() {
                 $("#trendMsg").trigger("update");
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
+                $("#timeScale").trigger('modify',timeScale);
                 return getAccuracy(stock);
             }
         )
