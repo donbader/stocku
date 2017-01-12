@@ -50,7 +50,8 @@
 						break;
 				}
 				return this;
-			}
+			};
+
 
 		},
 		/**************************************************
@@ -148,45 +149,54 @@
 			return newArr;
 		},
 		calcAccuracy: function(prevData, currData) {
-			if (prevData === undefined || currData === undefined || currData.price === undefined || currData.forecast === undefined || prevData.price === undefined)
+			if (prevData === undefined || currData === undefined || currData.price === undefined || currData.forecast === undefined || prevData.price === undefined){
+				if(prevData["numAcc"] && prevData["total"]){
+					var numAcc = parseInt(prevData["numAcc"]) || 0;
+					var total = parseInt(prevData["total"]) || 0;
+					return {
+						numAcc:numAcc,
+						total:total,
+						accuracy:parseFloat(((numAcc / total).toFixed(2)))
+					}
+				}
 				return;
-			var hit_acc = prevData["hit_acc"] || 0;
-			var hit_acc_size = prevData["hit_acc_size"] || 0;
+			}
 
+			var numAcc = parseInt(prevData["numAcc"]) || 0;
+			var total = parseInt(prevData["total"]) || 0;
 			var bias_forecast = parseFloat(currData["forecast"]) - parseFloat(prevData["price"]);
 			var bias_price = parseFloat(currData["price"]) - parseFloat(prevData["price"]);
 
-			if (typeof bias_forecast !== 'number' || typeof bias_price !== 'number') {
-				return {};
-			}
-			// This is an extra condition
-			// ( if price is not changed, then return prevData's accuracy)
-			if(bias_price == 0){
-				return {
-					hit_acc: hit_acc,
-					hit_acc_size: hit_acc_size,
-					accuracy: parseFloat(((hit_acc / hit_acc_size).toFixed(2)))
-				}
-			}
-			else if (bias_forecast != 0 && bias_price != 0) {
-				bias_forecast * bias_price > 0 ? ++hit_acc : 0;
+
+			if (bias_forecast != 0 && bias_price != 0) {
+				bias_forecast * bias_price > 0 ? ++numAcc : 0;
 			} else if (bias_forecast == bias_price) {
-				++hit_acc;
+				++numAcc;
 			}
-			++hit_acc_size;
+			// extra case :
+			// else if(bias_price == 0){
+			// 	--total;
+			// }
+			++total;
 
 			return {
-				hit_acc: hit_acc,
-				hit_acc_size: hit_acc_size,
-				accuracy: parseFloat(((hit_acc / hit_acc_size).toFixed(2)))
+				numAcc: numAcc,
+				total: total,
+				accuracy: parseFloat(((numAcc / total).toFixed(2)))
 			}
 
 		},
-		addAccuracy: function(arr) {
+		addAccuracy: function(arr, base) {
 			var accuracySoFar;
+			if(base){
+				var object = STOCKU.calcAccuracy(base, arr[0]);
+				STOCKU.ObjectCombine(arr[0], object);
+			}
+
 			for (var i = 1; i < arr.length; ++i) {
 				if (arr[i].accuracy === undefined){
 					var object = STOCKU.calcAccuracy(arr[i - 1], arr[i]);
+					// console.log(arr[i].time,object);
 					if(object){
 						STOCKU.ObjectCombine(arr[i], object);
 						accuracySoFar = object.accuracy;
@@ -195,53 +205,73 @@
 			}
 			return accuracySoFar;
 		},
-		addRMSE: function(data) {
+		trimData: function(arr){
+			arr.forEach((element)=>{
+				if(!(element.price && parseInt(element.price))){
+					delete element.price;
+				}
+				if(!(element.forecast && parseInt(element.forecast))){
+					delete element.forecast;
+				}
+			});
+			return arr;
+		},
+		findKeyByValue: function(obj,value){
+		    for( var prop in obj ) {
+		        if( obj.hasOwnProperty( prop ) ) {
+		             if( obj[ prop ] === value )
+		                 return prop;
+		        }
+		    }
+		    return -1;
+		},
+		addRMSE: function(arr) {
 			var size = 0;
 			var square = 0;
-			data[0].rmse_acc_size = size;
-			data[0].rmse_acc_square = square;
-			for (var i = 1; i < data.length; ++i) {
-				if (data[i].price === undefined || data[i].forecast === undefined) {
-					data[i].rmse_acc_size = size;
-					data[i].rmse_acc_square = square;
+			arr[0].rmse_acc_size = size;
+			arr[0].rmse_acc_square = square;
+			for (var i = 1; i < arr.length; ++i) {
+				if (arr[i].price === undefined || arr[i].forecast === undefined) {
+					arr[i].rmse_acc_size = size;
+					arr[i].rmse_acc_square = square;
 					continue;
 				}
-				data[i].rmse_acc_square = data[i - 1].rmse_acc_square;
-				data[i].rmse_acc_size = data[i - 1].rmse_acc_size;
+				arr[i].rmse_acc_square = arr[i - 1].rmse_acc_square;
+				arr[i].rmse_acc_size = arr[i - 1].rmse_acc_size;
 				// console.log(i);
-				// console.log(data[i-1].rmse_acc_square);
-				data[i].rmse_acc_square += Math.pow(data[i].price - data[i].forecast, 2);
-				data[i].rmse_acc_size += 1;
-				data[i].rmse = Math.sqrt(data[i].rmse_acc_square / data[i].rmse_acc_size).toFixed(2);
+				// console.log(arr[i-1].rmse_acc_square);
+				arr[i].rmse_acc_square += Math.pow(arr[i].price - arr[i].forecast, 2);
+				arr[i].rmse_acc_size += 1;
+				arr[i].rmse = Math.sqrt(arr[i].rmse_acc_square / arr[i].rmse_acc_size).toFixed(2);
 
-				square = data[i].rmse_acc_square;
-				size = data[i].rmse_acc_size;
+				square = arr[i].rmse_acc_square;
+				size = arr[i].rmse_acc_size;
 			}
 		},
-		ToOhlc: function(arrData, interval, scale) {
+		ToOhlc: function(arr, interval, scale) {
 			interval = interval || 5;
 			scale = scale || "min";
-			var firstIndex = STOCKU.getLastElementAppear(arrData, "price",true).index;
-			var startTime = new Date(arrData[firstIndex].time);
+			var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
+			var startTime = new Date(arr[firstIndex].time);
 			var nextTime = new Date(startTime).plus(interval, scale);
 			var ohlc;
 			var ohlcs = [];
-			for (var i = firstIndex; i < arrData.length; ++i) {
-				if(!arrData[i].price)continue;
-				var time = new Date(arrData[i].time).getTime();
+			for (var i = firstIndex; i < arr.length; ++i) {
+				if(!arr[i].price)continue;
+				var time = new Date(arr[i].time).getTime();
 				// console.log("time",new Date(time));
 				if(time == startTime.getTime()){
 					ohlcs.push({time: startTime.yyyymmddHHMMSS()});
 					ohlc = ohlcs[ohlcs.length - 1];
 					ohlc.open = ohlc.high = ohlc.low = ohlc.close
-						= arrData[i].price;
+						= arr[i].price;
 				}
 				else if (time > startTime.getTime() && time <= nextTime.getTime()){
-					if(arrData[i].price > ohlc.high)
-						ohlc.high = arrData[i].price;
-					else if(arrData[i].price < ohlc.low )
-						ohlc.low = arrData[i].price;
-					ohlc.close = arrData[i].price;
+					if(arr[i].price > ohlc.high)
+						ohlc.high = arr[i].price;
+					else if(arr[i].price < ohlc.low )
+						ohlc.low = arr[i].price;
+					ohlc.close = arr[i].price;
 
 					// identify the meaning of this candlestick
 					ohlc.meaning = giveCandleStickMeaning(ohlc);
@@ -281,7 +311,7 @@
 			return a;
 		},
 		getLastElementAppear: function(arr, elementName, reverse) {
-			if (arr === undefined) return;
+			if (arr === undefined || !arr.length) return {element: {}, index: undefined};
 			if(!reverse){
 				for (var i = arr.length - 1; i >= 0; --i) {
 					if (arr[i] !== undefined && arr[i][elementName] !== undefined) {
@@ -296,6 +326,15 @@
 					}
 				}
 			}
+			return {element: {}, index: undefined};
+		},
+		findPrevData: function(arr, today){
+			for(var i = arr.length - 1; i >= 0 ; --i){
+				var time = new Date(arr[i].time);
+				if(today > time) break;
+			}
+			if(i === -1)return;
+			return arr[i];
 		},
 		FetchNews: function(){
 			console.log("Fetching News...");
@@ -372,7 +411,7 @@
 
 			// You can use this function to find first index of price
 			//var firstIndex = STOCKU.getLastElementAppear(arr, "price",true).index;
-			for(var i = 0,valid_count = 0;i<arr.length - 1;i++){
+			for(var i = 0,valid_count = 0;i<arr.length;i++){
 				if(arr[i]['price'] !== undefined && arr[i]['price'] !== null){
 					arr[i]['reg'] = null;
 					x[valid_count] = i;
@@ -390,7 +429,7 @@
 		/**************************************************
 		 *              CHART                             *
 		 **************************************************/
-		Chart: function(id, type) {
+		Chart: function(id, type, dateFormat) {
 			// generate random id
 			var randNum = new Date().getTime() % 1000;
 			var chartID = 'chart' + randNum;
@@ -412,14 +451,15 @@
 			// Json data
 			this.jsonData = {};
 			this.addJsonData = function(data) {
+				// console.log("Add Json Data!!", this.jsonData, data);
 				// record old dates
 				this.prevStartTime = chart.startDate;
 				this.prevEndTime = chart.endDate;
 				STOCKU.mergeJson(this.jsonData, data);
-				var arr = chart.dataProvider;
+				// console.log("After merge, ", this.jsonData);
 				chart.dataProvider = STOCKU.JsonToArray(this.jsonData);
+				STOCKU.trimData(chart.dataProvider);
 				chart.dataProvider.sort((a, b) => new Date(a.time) < new Date(b.time) ? -1 : 1);
-				chart.dataProvider[chart.dataProvider.length - 1].bullet = "round";
 
 			};
 			this.arrayData = function(arr, changeJson) {
@@ -484,7 +524,7 @@
 						"shadowAlpha": 0
 					};
 
-					forecast_line.graphs[0].lineAlpha = 0.3;
+					forecast_line.graphs[0].lineAlpha = 0.6;
 					forecast_line.graphs[0].bulletField = "bullet";
 					rmse_line.graphs[0].hidden = true;
 					reg_line.graphs[0].hidden = true;
@@ -509,6 +549,22 @@
 					chart.chartScrollbar.graph = candlestick.graphs[0].id;
 					this.add(candlestick, axis);
 					break;
+				default:
+					var line = STOCKU.LoadSettings("config/graph.line.json", type);
+					var axis = STOCKU.LoadSettings("config/valueAxis.json", type);
+					line.graphs[0].balloon = {
+						"borderThickness": 0.2,
+						"cornerRadius": 10,
+						"adjustBorderColor": false,
+						"color": "#ffffff",
+						"shadowAlpha": 0
+					};
+					axis.valueAxes[0].title = type;
+					chart.chartScrollbar.graph = line.graphs[0].id;
+					chart.dataDateFormat = dateFormat || chart.dataDateFormat;
+
+					this.add(line,axis);
+					break;
 
 			}
 
@@ -516,7 +572,7 @@
 		Searcher: function(divId) {
 			var scope = this;
 			this.$ = {};
-			this.state = {price: {}, forecast:{}};
+			this.state = {price: {}, forecast:{}, accuracy:{}};
 			var input = this.$.input = $('<input class="stocku" type="search" placeholder="股票代碼">');
 			var button = this.$.button = $('<input class="stocku" type="button">');
 			$('#' + divId).append(input);
@@ -546,7 +602,7 @@
 		SearcherWithDate: function(divId) {
 			var scope = this;
 			this.$ = {};
-			this.state = {price: {}, forecast:{}};
+			this.state = {price: {}, forecast:{},accuracy:{}};
 
 			var searcher = this.searcher = new STOCKU.Searcher(divId);
 			this.$.input = searcher.$.input;

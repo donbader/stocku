@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Stocku</title>
+    <meta name="robots" content="noindex" charset="utf-8" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/amcharts/plugins/export/export.css" type="text/css" media="all" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/rank.css" />
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/elegant-font/code/style.css">
+    <!-- <link rel="stylesheet" href="stylesheets/chart.css"> -->
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <!-- <link rel="stylesheet" href="assets/css/magnific-popup.css"> -->
+    <!-- <link rel="stylesheet" href="assets/css/form-elements.css"> -->
+    <!-- <link rel="stylesheet" href="assets/css/media-queries.css"> -->
+    <!-- Resources -->
+    <script src="assets/amcharts/amcharts.js"></script>
+    <script src="assets/amcharts/serial.js"></script>
+    <script src="assets/amcharts/amstock.js"></script>
+    <script src="assets/amcharts/plugins/export/export.min.js"></script>
+    <script src="assets/amcharts/themes/light.js"></script>
+    <script src="assets/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<script src="assets/d3.v3.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="Home"></a>
+            </div>
+            <div class="collapse navbar-collapse" id="top-navbar-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="Home"><span aria-hidden="true" class="icon_house"></span><br>Home</a>
+                    </li>
+                    <li>
+                        <a href="stockid"><span aria-hidden="true" class="icon_search"></span><br>股票代碼</a>
+                    </li>
+                    <li>
+                        <a href="history"><span aria-hidden="true" class="icon_documents"></span><br>歷史紀錄</a>
+                    </li>
+					<li class="active">
+                        <a href="ranks"><span aria-hidden="true" class="icon_documents"></span><br>準確度排名</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- 推薦股票 -->
+    <div class="block-3-container section-container what-we-do-container">
+        <div class="container">
+		<!-- 
+	   =========================================================================================================================================
+	   -->
+            <div class="row" >
+                <div class="col-sm-6">
+                	<label>請選擇日期 <input id="sel_date" type="date"></label>
+                    <!-- <img id="distribution" src="images/dist/20161220_dist.png" /> -->
+                    <img id="distribution" />
+                </div>
+                <div id="rank" class="col-sm-3">
+                	<!-- <label><input class="sorted" type="checkbox">排序資料</label> -->
+                    <script src="javascripts/rank.js"></script>
+                </div>
+            </div>
+            
+	   <!-- 
+	   =========================================================================================================================================
+	   -->
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4 footer-box">
+                    <h4>WARNING</h4>
+                    <div class="footer-box-text">
+                        <p>以上資料僅供參考</p>
+                        <p>投資一定有風險，基金投資有賺有賠，申購前應詳閱公開說明書</p>
+                    </div>
+                </div>
+                <div class="col-sm-4 footer-box">
+                    <div class="footer-box-text">
+                        <h4>MEMBERS</h4>
+                        <ul>
+                            <li>李高丞&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>彭建瑋&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>馮禹德&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>賴俊愷&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                            <li>余俊毅&nbsp;<a href="#"><span class="social_facebook" style="color: white;"></span></a></li>
+                        </ul>
+                        <p><a href="about.html">About Us</a></p>
+                    </div>
+                </div>
+                <div class="col-sm-4 footer-box">
+                    <h4>HANDY LINK</h4>
+                    <a>Link</a>
+                    <a>Link</a>
+                    <a>Link</a>
+                    <a>Link</a>
+                    <a>Link</a>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 wow fadeIn">
+                    </div>
+                </div>
+                <div class="col-sm-12 footer-copyright">
+                    <div class="footer-border"></div>
+                    <p>&copy; Stocku - All rights reserved. </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- JS -->
+    <script type="text/javascript">
+    // Bootstrap dropdown bug
+    $('a[data-toggle="tab"]').on('click', function(e) {
+        var target = this.href.split("#")[1];
+        $('.dropdown-menu li.active').removeClass('active');
+        $('.tab-pane.fade.in.active').removeClass('in active');
+        $(this).parent('li').addClass('active');
+        $('#' + target).addClass('in active');
+    });
+    </script>
+</body>
+
+</html>

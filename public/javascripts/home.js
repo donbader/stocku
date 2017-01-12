@@ -11,91 +11,185 @@
  **************************************************/
 var lineChart = new STOCKU.Chart("lineChartDiv", "line");
 var candlestickChart = new STOCKU.Chart("candlestickChartDiv", "candlestick");
+var accuracyHistoryChart = new STOCKU.Chart("accuracyHistoryDiv", "accuracy", "YYYY-MM-DD");
 var searcherblock = new STOCKU.Searcher("searcherdiv");
 var tracker = new STOCKU.Tracker("trackerdiv");
 var idtable = STOCKU.LoadSettings("tables/idtable.json");
+var recommendStock = 2402;
 var timeScale = 1;
+
+STOCKU.FetchNews();
+
 /**************************************************
  *              GLOBAL FUNCTION                   *
  **************************************************/
- function getPrice(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.price) ?
-                            searcherblock.state.price.updateTime : undefined;
-     log("Getting Price...");
-     return new Promise((resolve, reject) => {
-         $.get("/StockData/price", {
-                 stock: stock,
-                 date: date,
-                 lastTimeUpdate: lastTimeUpdate
-             })
-             .done((response) => {
-                 if (response.msg == "DataFound"){
-                     $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
-                     searcherblock.state.price = {
-                         updateTime:new Date().getTime(),
-                         stock: stock
-                     };
-                     resolve(response.content);
-                 }
-                 else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
-                     searcherblock.state.price = {
-                         updateTime:undefined,
-                         stock: stock
-                     };
-                     reject(response);
-                 }
-                 else{
-                     $("#logmsg").trigger("set", ["價錢資料已是最新", "blue"]);
-                     reject(response);
-                 }
-             })
-             .fail((response) => {
-                 reject(response);
-             });
-     });
- }
+function getPrice(stock, date) {
+    var lastTimeUpdate = (stock === searcherblock.state.price.stock) && (date === searcherblock.state.price.date) ?
+        searcherblock.state.price.updateTime : undefined;
+    log("Getting Price...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/price", {
+                stock: stock,
+                date: date,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("set", ["找到價錢資料", "green"]);
+                    searcherblock.state.price = {
+                        updateTime: new Date().getTime(),
+                        stock: stock,
+                        date: date
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("set", ["沒有找到價錢資料", "red"]);
+                    searcherblock.state.price = {
+                        updateTime: undefined,
+                        stock: stock,
+                        date: date
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("set", ["價錢資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
 
 
- function getForecast(stock, date) {
-     var lastTimeUpdate = (stock == searcherblock.state.forecast) ?
-                            searcherblock.state.forecast.updateTime : undefined;
+function getForecast(stock, date) {
+    var lastTimeUpdate = (stock == searcherblock.state.forecast.stock) && (date === searcherblock.state.forecast.date) ?
+        searcherblock.state.forecast.updateTime : undefined;
 
-     log("Getting Forecast...");
-     return new Promise((resolve, reject) => {
-         $.get("/StockData/forecast", {
-                 stock: stock,
-                 date: date,
-                 lastTimeUpdate: lastTimeUpdate
-             })
-             .done((response) => {
-                 if (response.msg == "DataFound"){
-                     $("#logmsg").trigger("add", ["找到預測資料", "green"]);
-                     searcherblock.state.forecast = {
-                         updateTime:new Date().getTime(),
-                         stock: stock
-                     };
-                     resolve(response.content);
-                 }
-                 else if (response.msg == "DataNotFound") {
-                     $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
-                     searcherblock.state.forecast = {
-                         updateTime:undefined,
-                         stock: stock
-                     };
-                     reject(response);
-                 }
-                 else{
-                     $("#logmsg").trigger("add", ["預測資料已是最新", "blue"]);
-                     reject(response);
-                 }
-             })
-             .fail((response) => {
-                 reject(response);
-             });
-     });
- }
+    log("Getting Forecast...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/forecast", {
+                stock: stock,
+                date: date,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("add", ["找到預測資料", "green"]);
+                    searcherblock.state.forecast = {
+                        updateTime: new Date().getTime(),
+                        stock: stock,
+                        date: date
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("add", ["沒有找到預測資料", "red"]);
+                    searcherblock.state.forecast = {
+                        updateTime: undefined,
+                        stock: stock,
+                        date: date
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("add", ["預測資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
 
+function getAccuracy(stock) {
+    var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
+        searcherblock.state.accuracy.updateTime : undefined;
+
+    log("Getting Accuracy...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/AccuracyHistory", {
+                stock: stock,
+                lastTimeUpdate: lastTimeUpdate
+            })
+            .done((response) => {
+                if (response.msg == "DataFound") {
+                    $("#logmsg").trigger("add", ["找到準確率資料", "green"]);
+                    searcherblock.state.accuracy = {
+                        updateTime: new Date().getTime(),
+                        stock: stock
+                    };
+                    resolve(response.content);
+                } else if (response.msg == "DataNotFound") {
+                    $("#logmsg").trigger("add", ["沒有找到準確率資料", "red"]);
+                    searcherblock.state.accuracy = {
+                        updateTime: undefined,
+                        stock: stock
+                    };
+                    reject(response);
+                } else {
+                    $("#logmsg").trigger("add", ["準確率資料已是最新", "blue"]);
+                    reject(response);
+                }
+            })
+            .fail((response) => {
+                reject(response);
+            });
+    });
+}
+
+ function getAccuracy(stock){
+     var lastTimeUpdate = (stock == searcherblock.state.accuracy.stock) ?
+                            searcherblock.state.accuracy.updateTime : undefined;
+
+    log("Getting Accuracy...");
+    return new Promise((resolve, reject) => {
+        $.get("/StockData/AccuracyHistory", {
+            stock: stock,
+            lastTimeUpdate: lastTimeUpdate
+        })
+        .done((response) => {
+            if (response.msg == "DataFound") {
+                $("#logmsg").trigger("add", ["找到準確率資料", "green"]);
+                searcherblock.state.accuracy = {
+                    updateTime: new Date().getTime(),
+                    stock: stock
+                };
+                resolve(response.content);
+            } else if (response.msg == "DataNotFound") {
+                $("#logmsg").trigger("add", ["沒有找到準確率資料", "red"]);
+                searcherblock.state.accuracy = {
+                    updateTime: undefined,
+                    stock: stock
+                };
+                reject(response);
+            } else {
+                $("#logmsg").trigger("add", ["準確率資料已是最新", "blue"]);
+                reject(response);
+            }
+        })
+        .fail((response) => {
+            reject(response);
+        });
+    });
+}
+
+function getRank(){
+    return new Promise((resolve, reject)=>{
+        $.get("/StockData/Rank")
+        .done((response)=>{
+            if(response.msg == "DataFound"){
+                recommendStock = STOCKU.findKeyByValue(idtable, response.content.stock);
+                searcherblock.$.input.val(recommendStock);
+            }
+            searcherblock.$.button.mouseup();
+        });
+
+        var refreshId = setInterval(() => {
+            searcherblock.search();
+        }, 3000);
+
+    });
+}
 
 tracker.track = function(){
 	if(this.$.checkbox.prop("checked")){
@@ -130,17 +224,14 @@ function genNewData (){
     arr.push(nextData);
     STOCKU.addRMSE(arr);
     lineChart.updateJsonFromArray(arr);
-    var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
-    var slope = STOCKU.TrendLine(lineChart.arrayData());
-    $("#accuracyMsg").trigger("update", accuracySoFar);
+    // $("#accuracyMsg").trigger("update");
     $("#closeMsg").trigger("update");
-    $("#trendMsg").trigger("update", slope);
+    $("#trendMsg").trigger("update");
     $("#deltaMsg").trigger("update");
     $("#forecastMsg").trigger("update");
 
 
     $("#timeScale").trigger('modify',timeScale);
-
     lineChart.validateData();
     candlestickChart.validateData();
     tracker.track();
@@ -163,15 +254,15 @@ function log(msg, debug = true) {
  *              DEPLOY EVENT                      *
  **************************************************/
 
-$("#logmsg").on("set", function(event, msg, color) {
-    var msg = '<div style="color:' + color + '">' + msg + '</div>'
-    this.innerHTML = msg;
-})
+// $("#logmsg").on("set", function(event, msg, color) {
+//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
+//     this.innerHTML = msg;
+// })
 
-$("#logmsg").on("add", function(event, msg, color) {
-    var msg = '<div style="color:' + color + '">' + msg + '</div>'
-    this.innerHTML = this.innerHTML + "<br>" + msg;
-});
+// $("#logmsg").on("add", function(event, msg, color) {
+//     var msg = '<div style="color:' + color + '">' + msg + '</div>'
+//     this.innerHTML = this.innerHTML + "<br>" + msg;
+// });
 $("#stockNameMsg").on("update", function(){
     var stockNum = searcherblock.$.input.val();
     this.innerHTML = stockNum ? idtable[stockNum] : "隨機";
@@ -180,42 +271,73 @@ $("#closeMsg").on("update", function(){
     this.innerHTML = "TWD$ "
     this.innerHTML += STOCKU.getLastElementAppear(lineChart.arrayData(),"price").element.price;
 });
-$("#deltaMsg").on("update", function(){
+$("#deltaMsg").on("update", function() {
     var arr = lineChart.arrayData();
     var lastElement = STOCKU.getLastElementAppear(arr, "price");
     var delta = lastElement.element.price - arr[lastElement.index - 1].price;
-    this.innerHTML = delta >= 0 ? '+'+ delta.toFixed(2) : delta.toFixed(2);
-    this.style["background-color"] = delta >= 0 ? "green" : "red";
+    this.innerHTML = delta >= 0 ? '+' + delta.toFixed(2) : delta.toFixed(2);
+    this.style["background-color"] = delta >= 0 ? "red" : "green";
 });
 
-$("#trendMsg").on("update", function(event, slope){
-    slope = slope || 0;
-    this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "("+slope.toFixed(2)+")";
-    this.style.color= slope > 0 ? "green" : slope < 0 ? "red" : "gray";
+$("#trendMsg").on("update", function(event) {
+    var slope = STOCKU.TrendLine(lineChart.arrayData());
+    this.innerHTML = (slope == 0 ? "持平" : slope > 0 ? "看漲" : "看跌") + "(" + (slope*100).toFixed(2) + "%)";
+    this.style.color = slope > 0 ? "red" : slope < 0 ? "green" : "gray";
 });
+
 
 $("#forecastMsg").on("update", function(event){
-    var forecast = STOCKU.getLastElementAppear(lineChart.arrayData(), "forecast").element.forecast;
-    var price = STOCKU.getLastElementAppear(lineChart.arrayData(), "price").element.price;
-    var delta = forecast - price;
+    var arr = lineChart.arrayData();
+    var lastElements = {};
+    lastElements['bullet'] = STOCKU.getLastElementAppear(arr, "bullet").element;
+    lastElements['forecast'] = STOCKU.getLastElementAppear(arr, "forecast").element;
+    lastElements['price'] = STOCKU.getLastElementAppear(arr, "price").element;
+    // re-new bullet
+    if(lastElements['bullet'].bullet)
+        delete lastElements['bullet'].bullet;
+    lastElements['forecast'].bullet = "round";
+
+    var delta = lastElements['forecast'].forecast - lastElements['price'].price;
     this.style.color = "white";
     this.style["background-color"] = ( delta > 0) ? "rgba(0, 125, 0, 0.5)" : (delta < 0 ) ? "rgba(255,0, 0, 0.5)" : "gray";
-    this.innerHTML = ( delta > 0) ? "可買進" : (delta < 0 ) ? "可賣出" : "持有";
+    this.innerHTML = (delta > 0) ? "可買進"
+                    :(delta < 0 ) ? "可賣出"
+                    : (delta == 0) ? "持有"
+                    : "無法預測";
+
+    lineChart.validateData();
 });
 
 
-$("#accuracyMsg").on("update", function(event, val){
-    val *= 100;
+$("#accuracyMsg").on("update", function(event, today) {
+    var arr = accuracyHistoryChart.arrayData();
+    arr.forEach((element) => {
+        element.accuracy = (parseInt(element.numAcc) / parseInt(element.total)).toFixed(2);
+    });
+
+    today = new Date(today);
+    var prevData = STOCKU.findPrevData(accuracyHistoryChart.arrayData(), today);
+
+    var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData(), prevData);
+    accuracySoFar *= 100;
     var bgcolor;
-    switch(true){
-        case val < 60: bgcolor = "rgba(0, 0, 0, 0.5)";break;
-        case val < 70: bgcolor = "rgba(255,0, 0, 0.5)";break;
-        case val <= 80: bgcolor = "rgba(255, 125, 0, 0.5)";break;
-        default: bgcolor = "rgba(0, 125, 0, 0.5)";break;
+    switch (true) {
+        case accuracySoFar < 60:
+            bgcolor = "rgba(0, 0, 0, 0.5)";
+            break;
+        case accuracySoFar < 70:
+            bgcolor = "rgba(255,0, 0, 0.5)";
+            break;
+        case accuracySoFar <= 80:
+            bgcolor = "rgba(255, 125, 0, 0.5)";
+            break;
+        default:
+            bgcolor = "rgba(0, 125, 0, 0.5)";
+            break;
     }
     this.style["background-color"] = bgcolor;
     this.style.color = "white";
-    this.innerHTML = val.toFixed(2) + "%";
+    this.innerHTML = accuracySoFar.toFixed(2) + "%";
 });
 
 $("#timeScale").on("modify",function(event, val){
@@ -233,75 +355,87 @@ $("#timeScale").on("modify",function(event, val){
 
 // Override search();
 searcherblock.search = function (){
-	// clear data
-	lineChart.jsonData = {};
     var stock = searcherblock.$.input.val();
     var date = new Date().yyyymmdd();
-	getPrice(stock, date)
-		.then(
-		    (data) => {
+    getPrice(stock, date)
+        .then(
+            (data) => {
+                if(searcherblock.state.price.stock !== stock){
+                    lineChart.jsonData = {};
+                }
                 lineChart.addJsonData(data);
-                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5,"min"));
-                var slope = STOCKU.TrendLine(lineChart.arrayData());
+                candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), timeScale, "min"));
                 $("#stockNameMsg").trigger("update");
-                $("#trendMsg").trigger("update", slope);
                 $("#deltaMsg").trigger("update");
                 $("#closeMsg").trigger("update");
+
+                lineChart.validateData();
+                candlestickChart.validateData();
+                $("#timeScale").trigger('modify',timeScale);
                 return getForecast(stock, date);
-		    },
-		    (response) =>getForecast(stock, date)
-		)
-		.then(
-		    (data) => {
-                lineChart.addJsonData(data)
+            },
+            (response) => getForecast(stock, date)
+        )
+        .then(
+            (data) => {
+                lineChart.addJsonData(data);
                 STOCKU.addRMSE(lineChart.arrayData());
-                var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
-                $("#accuracyMsg").trigger("update", accuracySoFar);
+
                 $("#forecastMsg").trigger("update");
+                $("#trendMsg").trigger("update");
 
                 lineChart.updateJsonFromArray();
                 lineChart.validateData();
-                candlestickChart.validateData();
+                $("#timeScale").trigger('modify',timeScale);
+                return getAccuracy(stock);
+            },
+            (response) => getAccuracy(stock)
+        )
+        .then(
+            (data)=> {
+                if(searcherblock.state.accuracy.stock !== stock)
+                    accuracyHistoryChart.jsonData = {};
+                accuracyHistoryChart.addJsonData(data);
 
-                tracker.track();
-            }
-		);
+                $("#accuracyMsg").trigger("update", date);
+
+                accuracyHistoryChart.validateData();
+            },
+            (response) => {}
+        );
 }
 
 /**************************************************
  *              MAIN                              *
  **************************************************/
+getRank();
 // set up searcher block
-// searcherblock.$.input.val(1101);
 // tracker.$.input.val(20);
 // searcherblock.$.button.mouseup();
 //
-// var refreshId = setInterval(() => {
-//     searcherblock.search();
-// }, 3000);
+
 //--------------------------------------------------
 
 // Random Data
-$("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
-var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
-var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
-priceData = STOCKU.ObjectCombine(priceData, forecastData);
+// $("#logmsg").trigger("set", ["此為隨機產生之資料", "purple"]);
+// var priceData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:00:00", "price", 1, "min");
+// var forecastData = STOCKU.genJsonData("2016-11-07 09:00:00", "2016-11-07 10:01:00", "forecast", 1, "min", 4, priceData, "price");
+// priceData = STOCKU.ObjectCombine(priceData, forecastData);
 
-lineChart.addJsonData(priceData);
-STOCKU.addRMSE(lineChart.arrayData());
-candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
+// lineChart.addJsonData(priceData);
+// STOCKU.addRMSE(lineChart.arrayData());
+// candlestickChart.arrayData(STOCKU.ToOhlc(lineChart.arrayData(), 5, "min"));
 
 
-STOCKU.TrendLine(lineChart.arrayData());
+// STOCKU.TrendLine(lineChart.arrayData());
 
 // var accuracySoFar = STOCKU.addAccuracy(lineChart.arrayData());
 // $("#logmsg").trigger("add", ["準確率: " + accuracySoFar, "green"]);
-STOCKU.FetchNews();
-$("#stockNameMsg").trigger("update");
-$("#deltaMsg").trigger("update");
+// $("#stockNameMsg").trigger("update");
+// $("#deltaMsg").trigger("update");
 
 // set Interval
-var refreshId = setInterval(() => {
-    genNewData();
-}, 3000);
+// var refreshId = setInterval(() => {
+    // genNewData();
+// }, 3000);
 //--------------------------------------------------
