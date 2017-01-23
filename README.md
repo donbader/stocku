@@ -4,7 +4,7 @@
 
 ## 安裝:
 ```
-$ git clone https://github.com/0xYTF/stocku
+$ git clone https://github.com/donbader/stocku
 $ cd stocku
 $ npm install
 ```
